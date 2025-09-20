@@ -1,17 +1,18 @@
+import 'package:finance_tracker_app/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/user_provider.dart';
 import 'widgets/home_page.dart';
 import 'widgets/login_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await ServiceLocator.init();
+
   runApp(
     ChangeNotifierProvider(
-      create:
-          (context) =>
-              UserProvider()
-                ..init()
-                ..updateUser(),
+      create: (context) => UserProvider()..init(),
       child: const App(),
     ),
   );
@@ -30,11 +31,11 @@ class App extends StatelessWidget {
       scrollBehavior: NoThumbScrollBehavior().copyWith(scrollbars: false),
       home: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
-          if (userProvider.isLoggedIn == null) {
+          if (!userProvider.isReady) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
-          } else if (userProvider.isLoggedIn!) {
+          } else if (userProvider.isLoggedIn) {
             return const HomePage();
           } else {
             return const LoginPage();

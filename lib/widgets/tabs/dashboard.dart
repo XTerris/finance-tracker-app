@@ -10,6 +10,31 @@ class DashboardTab extends StatefulWidget {
 }
 
 class _DashboardTabState extends State<DashboardTab> {
+  void _showLogoutDialog(UserProvider userProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Выход'),
+          content: const Text('Вы уверены, что хотите выйти из аккаунта?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // hide dialog
+                userProvider.logout();
+              },
+              child: const Text('Выйти'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -21,11 +46,28 @@ class _DashboardTabState extends State<DashboardTab> {
 
           children: [
             SizedBox(height: 32),
-            Consumer<UserProvider>(
-              builder: (context, userProvider, child) => Text(
-                'Добрый день, ${userProvider.currentUser!.name}!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Consumer<UserProvider>(
+                    builder:
+                        (context, userProvider, child) => Text(
+                          'Добрый день, ${userProvider.currentUser!.name}!',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                  ),
+                ),
+                IconButton(
+                  onPressed:
+                      () => _showLogoutDialog(context.read<UserProvider>()),
+                  icon: const Icon(Icons.logout),
+                  tooltip: 'Выйти',
+                ),
+              ],
             ),
             SizedBox(height: 16),
             IntrinsicHeight(

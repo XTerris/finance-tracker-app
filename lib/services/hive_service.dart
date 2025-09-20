@@ -1,26 +1,41 @@
+import 'package:hive_flutter/hive_flutter.dart';
 import '../models/user.dart';
 
 
 class HiveService {
-  // TODO: Implement Hive DB methods
-  Future<void> save(String box, dynamic data) async {
-    // Placeholder for save method
+  static const String _userBox = 'user';
+
+  static const String _currentUserKey = "currentUser";
+
+  static Future<void> init() async {
+    await Hive.initFlutter();
+
+    // Register adapters
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(UserAdapter());
+    }
+
+    // Open boxes
+    await Hive.openBox<User>(_userBox);
   }
 
-  Future<dynamic> get(String box, String key) async {
-    // Placeholder for get method
-    return null;
-  }
-
-  Future<User> getCurrentUser() async {
-    // Wait 2 seconds
-    await Future.delayed(const Duration(seconds: 2));
-    // Placeholder for getting current user
-    return User(id: "1", name: "John Doe", email: "john.doe@example.com"); // Replace with actual user retrieval logic
+  Future<User?> getCurrentUser() async {
+    final box = Hive.box<User>(_userBox);
+    final user = box.get(_currentUserKey);
+    return user;
   }
 
   Future<void> saveCurrentUser(User user) async {
-    // Placeholder for saving current user
-    await save('userBox', user);
+    final box = Hive.box<User>(_userBox);
+    await box.put(_currentUserKey, user);
+  }
+
+  Future<void> clearCurrentUser() async {
+    final box = Hive.box<User>(_userBox);
+    await box.delete(_currentUserKey);
+  }
+
+  Future<void> dispose() async {
+    await Hive.close();
   }
 }

@@ -9,16 +9,24 @@ class ServiceLocator {
 
     ServiceLocator._internal();
     
-    ApiService? _apiService;
-    HiveService? _hiveService;
-    
-    ApiService get apiService {
-        return _apiService ??= ApiService();
+    late ApiService _apiService;
+    late HiveService _hiveService;
+
+    static Future<void> init() async {
+      await ApiService.init();
+      await HiveService.init();
+      _instance._apiService = ApiService();
+      _instance._hiveService = HiveService();
     }
+
     
-    HiveService get hiveService {
-        return _hiveService ??= HiveService();
-    }
+    ApiService get apiService => _apiService;
+    HiveService get hiveService => _hiveService;
+
+    Future<void> dispose() async {
+      _apiService.dispose();
+      await _hiveService.dispose();
+  }
 }
 
 final serviceLocator = ServiceLocator();
