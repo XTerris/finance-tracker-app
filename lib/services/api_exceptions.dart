@@ -41,6 +41,10 @@ class ValidationError {
   String toString() => '$message (${location.join('.')})';
 }
 
+class NotFoundException extends ApiException {
+  NotFoundException(super.message) : super(statusCode: 404);
+}
+
 class NetworkException extends ApiException {
   NetworkException(super.message);
 }

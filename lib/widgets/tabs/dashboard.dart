@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/transaction.dart';
 import '../../providers/user_provider.dart';
+import 'tab_widgets/transaction_plate.dart';
 
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
@@ -130,27 +132,14 @@ class _DashboardTabState extends State<DashboardTab> {
             ),
             SizedBox(height: 16),
             for (var i = 0; i < 10; i++)
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16),
-                margin: EdgeInsets.only(bottom: 16), // added only for test
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Покупка',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text('Сумма: 1234', style: TextStyle(fontSize: 14)),
-                  ],
+              TransactionPlate(
+                transaction: Transaction(
+                  id: i,
+                  title: 'Transaction $i',
+                  amount: i * 100,
+                  doneAt: DateTime.now(),
+                  categoryId: 1,
+                  accountId: 1,
                 ),
               ),
           ],

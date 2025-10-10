@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:finance_tracker_app/models/transaction.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_exceptions.dart';
@@ -8,7 +9,8 @@ import '../models/user.dart';
 enum HttpMethod { get, post, put, delete, patch }
 
 class ApiService {
-  static const String _defaultServerIp = 'localhost'; // '172.16.0.31';
+  static const String _defaultServerIp =
+      '192.168.1.142'; // 'localhost'; // '172.16.0.31';
   static const String _defaultServerPort = '8001';
   static const Duration _timeout = Duration(seconds: 5);
 
@@ -80,6 +82,8 @@ class ApiService {
       case 401:
         await clearToken();
         throw UnauthorizedException('Неавторизованный доступ');
+      case 404:
+        throw NotFoundException('Ресурс не найден');
       case 422:
         final errors =
             data != null && data['detail'] != null
@@ -205,6 +209,56 @@ class ApiService {
     final data = await _makeRequest(HttpMethod.get, '/users/me');
 
     return User.fromJson(data);
+  }
+
+  Future<Transaction> getTransaction(int id) async {
+    final data = await _makeRequest(HttpMethod.get, '/transactions/$id');
+    return Transaction.fromJson(data);
+  }
+
+  Future<List<Transaction>> getAllTransactions() async {
+    final transactions = <Transaction>[];
+    var currentOffset = 0;
+    const limit = 100;
+
+    while (true) {
+      final data = await _makeRequest(
+        HttpMethod.get,
+        '/transactions/',
+        queryParams: {
+          'offset': currentOffset.toString(),
+          'limit': limit.toString(),
+        },
+      );
+
+      final page = ((data as Map)['items'] as List)
+          .map((e) => Transaction.fromJson(e))
+          .toList(growable: false);
+
+      transactions.addAll(page);
+
+      if (page.length < limit) {
+        break;
+      }
+
+      currentOffset += limit;
+    }
+
+    return transactions;
+  }
+
+  Future<List<int>> getUpdatedTransactionIds(int since) async {
+    final data = await _makeRequest(
+      HttpMethod.get,
+      '/transactions/updated',
+      queryParams: {'updated_since': since.toString()},
+    );
+
+    return (data as List).map((e) => e as int).toList();
+  }
+
+  Future<void> deleteTransaction(int id) async {
+    await _makeRequest(HttpMethod.delete, '/transactions/$id');
   }
 
   void dispose() {

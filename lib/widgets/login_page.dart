@@ -41,10 +41,11 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _errorMessage = 'Ошибка сети';
       });
-    } on Exception {
+    } on Exception catch (e) {
       setState(() {
         _errorMessage = 'Непредвиденная ошибка';
       });
+      print('Login error: $e');
     }
   }
 
@@ -304,12 +305,13 @@ class _LoginPageState extends State<LoginPage> {
     return ElevatedButton(
       onPressed: () async {
         _showLoadingDialog(context);
+        final navigator = Navigator.of(context);
         if (_registrationMode) {
           await _register();
         } else {
           await _login();
         }
-        Navigator.of(context).pop(); // Close the loading dialog
+        navigator.pop(); // Close the loading dialog
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary,

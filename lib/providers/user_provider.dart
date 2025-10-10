@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../service_locator.dart';
 import '../models/user.dart';
+import '../service_locator.dart';
 
 class UserProvider extends ChangeNotifier {
   late User _currentUser;

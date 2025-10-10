@@ -1,3 +1,4 @@
+import 'package:finance_tracker_app/providers/transaction_provider.dart';
 import 'package:finance_tracker_app/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,8 +12,15 @@ void main() async {
   await ServiceLocator.init();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => UserProvider()..init(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<UserProvider>(
+          create: (context) => UserProvider()..init(),
+        ),
+        ChangeNotifierProvider<TransactionProvider>(
+          create: (context) => TransactionProvider()..init(),
+        ),
+      ],
       child: const App(),
     ),
   );
