@@ -62,6 +62,65 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
     }
   }
 
+  Future<void> _createNewCategory(BuildContext context) async {
+    final categoryNameController = TextEditingController();
+
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Новая категория'),
+            content: TextField(
+              controller: categoryNameController,
+              decoration: const InputDecoration(
+                labelText: 'Название категории',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final name = categoryNameController.text.trim();
+                  if (name.isNotEmpty) {
+                    Navigator.of(context).pop(name);
+                  }
+                },
+                child: const Text('Создать'),
+              ),
+            ],
+          ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      final categoryProvider = context.read<CategoryProvider>();
+      categoryProvider.addCategory(result);
+
+      // Wait a bit for the provider to update
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // Set the newly created category as selected
+      if (categoryProvider.categories.isNotEmpty) {
+        final newCategory = categoryProvider.categories.last;
+        setState(() {
+          _selectedCategoryId = newCategory.id;
+        });
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Категория "$result" создана')));
+      }
+    }
+
+    categoryNameController.dispose();
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -203,20 +262,35 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.category),
                 ),
-                items:
-                    categoryProvider.categories.map((category) {
-                      return DropdownMenuItem<int>(
-                        value: category.id,
-                        child: Text(category.name),
-                      );
-                    }).toList(),
+                items: [
+                  ...categoryProvider.categories.map((category) {
+                    return DropdownMenuItem<int>(
+                      value: category.id,
+                      child: Text(category.name),
+                    );
+                  }),
+                  const DropdownMenuItem<int>(
+                    value: -1,
+                    child: Row(
+                      children: [
+                        Icon(Icons.add, size: 20),
+                        SizedBox(width: 8),
+                        Text('Создать новую категорию'),
+                      ],
+                    ),
+                  ),
+                ],
                 onChanged: (value) {
-                  setState(() {
-                    _selectedCategoryId = value;
-                  });
+                  if (value == -1) {
+                    _createNewCategory(context);
+                  } else {
+                    setState(() {
+                      _selectedCategoryId = value;
+                    });
+                  }
                 },
                 validator: (value) {
-                  if (value == null) {
+                  if (value == null || value == -1) {
                     return 'Пожалуйста, выберите категорию';
                   }
                   return null;
