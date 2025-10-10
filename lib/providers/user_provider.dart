@@ -14,9 +14,12 @@ class UserProvider extends ChangeNotifier {
   Future<void> init() async {
     User? user = await serviceLocator.hiveService.getCurrentUser();
 
-    _isLoggedIn = user != null;
+    _isLoggedIn = user != null && serviceLocator.apiService.isAuthenticated;
+
     if (_isLoggedIn) {
       _currentUser = user!;
+    } else if (user != null && !serviceLocator.apiService.isAuthenticated) {
+      await serviceLocator.hiveService.clearCurrentUser();
     }
 
     _isReady = true;

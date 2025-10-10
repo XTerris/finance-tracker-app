@@ -18,7 +18,9 @@ class ApiService {
 
   late http.Client _client;
   String? _accessToken;
+  String? _refreshToken;
   final String _baseUrl = 'http://$_defaultServerIp:$_defaultServerPort';
+  bool _isRefreshing = false;
 
   factory ApiService() => _instance;
 
@@ -31,22 +33,26 @@ class ApiService {
     _instance._client = http.Client();
   }
 
-  // Token management
   Future<void> _loadTokenFromStorage() async {
     final prefs = await SharedPreferences.getInstance();
     _accessToken = prefs.getString('access_token');
+    _refreshToken = prefs.getString('refresh_token');
   }
 
-  Future<void> _saveTokenToStorage(String token) async {
+  Future<void> _saveTokenToStorage(Token token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('access_token', token);
-    _accessToken = token;
+    await prefs.setString('access_token', token.accessToken);
+    await prefs.setString('refresh_token', token.refreshToken);
+    _accessToken = token.accessToken;
+    _refreshToken = token.refreshToken;
   }
 
   Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
+    await prefs.remove('refresh_token');
     _accessToken = null;
+    _refreshToken = null;
   }
 
   bool get isAuthenticated => _accessToken != null;
@@ -68,7 +74,10 @@ class ApiService {
     return headers;
   }
 
-  Future<dynamic> _handleResponse(http.Response response) async {
+  Future<dynamic> _handleResponse(
+    http.Response response, {
+    bool isRetry = false,
+  }) async {
     dynamic data;
     try {
       data = response.body.isNotEmpty ? json.decode(response.body) : null;
@@ -82,7 +91,12 @@ class ApiService {
       case 204:
         return data;
       case 401:
-        await clearToken();
+        // If this is already a retry or we're currently refreshing, don't retry again
+        if (isRetry || _isRefreshing) {
+          await clearToken();
+          throw UnauthorizedException('Неавторизованный доступ');
+        }
+        // Try to refresh the token
         throw UnauthorizedException('Неавторизованный доступ');
       case 404:
         throw NotFoundException('Ресурс не найден');
@@ -108,63 +122,90 @@ class ApiService {
     Map<String, dynamic>? body,
     Map<String, String>? queryParams,
     bool useFormData = false,
+    bool isRetry = false,
   }) async {
-    final uri = Uri.parse(
-      '$_baseUrl$endpoint',
-    ).replace(queryParameters: queryParams);
+    try {
+      final uri = Uri.parse(
+        '$_baseUrl$endpoint',
+      ).replace(queryParameters: queryParams);
 
-    late http.Response response;
-    final headers = useFormData ? _formHeaders : _headers;
+      late http.Response response;
+      final headers = useFormData ? _formHeaders : _headers;
 
-    switch (method) {
-      case HttpMethod.get:
-        response = await _client.get(uri, headers: headers).timeout(_timeout);
-        break;
-      case HttpMethod.post:
-        if (useFormData) {
+      switch (method) {
+        case HttpMethod.get:
+          response = await _client.get(uri, headers: headers).timeout(_timeout);
+          break;
+        case HttpMethod.post:
+          if (useFormData) {
+            response = await _client
+                .post(
+                  uri,
+                  headers: headers,
+                  body: body?.entries
+                      .map((e) => '${e.key}=${e.value}')
+                      .join('&'),
+                )
+                .timeout(_timeout);
+          } else {
+            response = await _client
+                .post(
+                  uri,
+                  headers: headers,
+                  body: body != null ? json.encode(body) : null,
+                )
+                .timeout(_timeout);
+          }
+          break;
+        case HttpMethod.put:
           response = await _client
-              .post(
-                uri,
-                headers: headers,
-                body: body?.entries.map((e) => '${e.key}=${e.value}').join('&'),
-              )
-              .timeout(_timeout);
-        } else {
-          response = await _client
-              .post(
+              .put(
                 uri,
                 headers: headers,
                 body: body != null ? json.encode(body) : null,
               )
               .timeout(_timeout);
-        }
-        break;
-      case HttpMethod.put:
-        response = await _client
-            .put(
-              uri,
-              headers: headers,
-              body: body != null ? json.encode(body) : null,
-            )
-            .timeout(_timeout);
-        break;
-      case HttpMethod.delete:
-        response = await _client
-            .delete(uri, headers: headers)
-            .timeout(_timeout);
-        break;
-      case HttpMethod.patch:
-        response = await _client
-            .patch(
-              uri,
-              headers: headers,
-              body: body != null ? json.encode(body) : null,
-            )
-            .timeout(_timeout);
-        break;
-    }
+          break;
+        case HttpMethod.delete:
+          response = await _client
+              .delete(uri, headers: headers)
+              .timeout(_timeout);
+          break;
+        case HttpMethod.patch:
+          response = await _client
+              .patch(
+                uri,
+                headers: headers,
+                body: body != null ? json.encode(body) : null,
+              )
+              .timeout(_timeout);
+          break;
+      }
 
-    return await _handleResponse(response);
+      return await _handleResponse(response, isRetry: isRetry);
+    } on UnauthorizedException {
+      // If not already retrying and we have a refresh token, try to refresh
+      if (!isRetry && _refreshToken != null && !_isRefreshing) {
+        try {
+          await refreshToken();
+          // Retry the request with the new token
+          return await _makeRequest(
+            method,
+            endpoint,
+            body: body,
+            queryParams: queryParams,
+            useFormData: useFormData,
+            isRetry: true,
+          );
+        } catch (e) {
+          // If refresh fails, clear tokens and rethrow
+          await clearToken();
+          rethrow;
+        }
+      }
+      // If we can't refresh, rethrow the exception
+      rethrow;
+    }
   }
 
   Future<Token> login(String username, String password) async {
@@ -180,8 +221,57 @@ class ApiService {
     );
 
     final token = Token.fromJson(data);
-    await _saveTokenToStorage(token.accessToken);
+    await _saveTokenToStorage(token);
     return token;
+  }
+
+  Future<Token> refreshToken() async {
+    if (_refreshToken == null) {
+      throw ApiException('No refresh token available');
+    }
+
+    _isRefreshing = true;
+    try {
+      final uri = Uri.parse(
+        '$_baseUrl/refresh',
+      ).replace(queryParameters: {'refresh_token': _refreshToken!});
+
+      final response = await _client
+          .post(uri, headers: {'Content-Type': 'application/json'})
+          .timeout(_timeout);
+
+      dynamic data;
+      try {
+        data = response.body.isNotEmpty ? json.decode(response.body) : null;
+      } catch (e) {
+        throw ApiException('Сервер вернул некорректный JSON ответ');
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final token = Token.fromJson(data);
+        await _saveTokenToStorage(token);
+        return token;
+      } else if (response.statusCode == 401) {
+        await clearToken();
+        throw UnauthorizedException('Refresh token истек или недействителен');
+      } else {
+        throw ApiException(
+          'Ошибка при обновлении токена',
+          statusCode: response.statusCode,
+        );
+      }
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      await _makeRequest(HttpMethod.post, '/logout');
+    } finally {
+      // Always clear tokens locally, even if the request fails
+      await clearToken();
+    }
   }
 
   Future<void> createUser(
