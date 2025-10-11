@@ -351,6 +351,7 @@ class ApiService {
   Future<Transaction> createTransaction({
     required String title,
     required double amount,
+    required bool isIncome,
     required int categoryId,
     required int accountId,
     DateTime? doneAt,
@@ -361,6 +362,7 @@ class ApiService {
       body: {
         'title': title,
         'amount': amount,
+        'is_income': isIncome,
         'category_id': categoryId,
         'account_id': accountId,
         if (doneAt != null) 'done_at': doneAt.toIso8601String(),

@@ -20,6 +20,7 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
 
   int? _selectedCategoryId;
   int? _selectedAccountId;
+  bool _isIncome = false;
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
 
@@ -150,14 +151,19 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
 
     try {
       final transactionProvider = context.read<TransactionProvider>();
+      final accountProvider = context.read<AccountProvider>();
 
       await transactionProvider.addTransaction(
         title: _titleController.text.trim(),
         amount: double.parse(_amountController.text.trim()),
+        isIncome: _isIncome,
         categoryId: _selectedCategoryId!,
         accountId: _selectedAccountId!,
         doneAt: _selectedDate,
       );
+
+      // Update account balances after creating transaction
+      await accountProvider.update();
 
       if (mounted) {
         navigator.pop();
@@ -254,6 +260,46 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
                     return 'Пожалуйста, введите корректное число';
                   }
                   return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Transaction Type
+              DropdownButtonFormField<bool>(
+                value: _isIncome,
+                decoration: const InputDecoration(
+                  labelText: 'Тип транзакции',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.swap_vert),
+                ),
+                items: const [
+                  DropdownMenuItem<bool>(
+                    value: false,
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_downward, color: Colors.red, size: 20),
+                        SizedBox(width: 8),
+                        Text('Расход'),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem<bool>(
+                    value: true,
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_upward, color: Colors.green, size: 20),
+                        SizedBox(width: 8),
+                        Text('Доход'),
+                      ],
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _isIncome = value;
+                    });
+                  }
                 },
               ),
               const SizedBox(height: 16),

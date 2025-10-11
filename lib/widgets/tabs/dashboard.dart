@@ -140,6 +140,7 @@ class _DashboardTabState extends State<DashboardTab> {
                   doneAt: DateTime.now(),
                   categoryId: 1,
                   accountId: 1,
+                  isIncome: i % 2 == 0,
                 ),
               ),
           ],

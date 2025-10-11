@@ -16,6 +16,8 @@ class Transaction {
   final int categoryId;
   @HiveField(5)
   final int accountId;
+  @HiveField(6)
+  final bool isIncome;
 
   Transaction({
     required this.id,
@@ -24,6 +26,7 @@ class Transaction {
     required this.doneAt,
     required this.categoryId,
     required this.accountId,
+    required this.isIncome,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -34,6 +37,7 @@ class Transaction {
       doneAt: DateTime.parse(json['done_at']),
       categoryId: json['category_id'],
       accountId: json['account_id'],
+      isIncome: json['is_income'],
     );
   }
 
@@ -45,6 +49,7 @@ class Transaction {
       'done_at': doneAt.toIso8601String(),
       'category_id': categoryId,
       'account_id': accountId,
+      'is_income': isIncome,
     };
   }
 }

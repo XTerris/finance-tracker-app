@@ -57,6 +57,7 @@ class TransactionProvider extends ChangeNotifier {
   Future<void> addTransaction({
     required String title,
     required double amount,
+    required bool isIncome,
     required int categoryId,
     required int accountId,
     DateTime? doneAt,
@@ -64,6 +65,7 @@ class TransactionProvider extends ChangeNotifier {
     final transaction = await serviceLocator.apiService.createTransaction(
       title: title,
       amount: amount,
+      isIncome: isIncome,
       categoryId: categoryId,
       accountId: accountId,
       doneAt: doneAt,
