@@ -18,6 +18,18 @@ class UserProvider extends ChangeNotifier {
 
     if (_isLoggedIn) {
       _currentUser = user!;
+      // Verify the token is still valid by making an API call
+      try {
+        final currentUser = await serviceLocator.apiService.getCurrentUser();
+        _currentUser = currentUser;
+        await serviceLocator.hiveService.saveCurrentUser(_currentUser);
+      } catch (e) {
+        // If we can't get the current user, the session is invalid
+        print('Session validation failed: $e');
+        _isLoggedIn = false;
+        await serviceLocator.apiService.clearToken();
+        await serviceLocator.hiveService.clearCurrentUser();
+      }
     } else if (user != null && !serviceLocator.apiService.isAuthenticated) {
       await serviceLocator.hiveService.clearCurrentUser();
     }

@@ -96,7 +96,6 @@ class ApiService {
           await clearToken();
           throw UnauthorizedException('Неавторизованный доступ');
         }
-        // Try to refresh the token
         throw UnauthorizedException('Неавторизованный доступ');
       case 404:
         throw NotFoundException('Ресурс не найден');
@@ -405,7 +404,7 @@ class ApiService {
     final data = await _makeRequest(
       HttpMethod.post,
       '/accounts/',
-      body: {'name': name, 'initial_balance': initialBalance},
+      body: {'name': name, 'balance': initialBalance},
     );
     return Account.fromJson(data);
   }
