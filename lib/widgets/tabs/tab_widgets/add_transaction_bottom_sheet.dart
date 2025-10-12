@@ -70,6 +70,7 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
     final categoryNameController = TextEditingController();
     final categoryProvider = context.read<CategoryProvider>();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
 
     final result = await showDialog<String>(
       context: context,
@@ -121,7 +122,7 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
         );
       } catch (e) {
         if (!mounted) return;
-        Navigator.of(context).pop(); // Close bottom sheet first
+        navigator.pop(); // Close bottom sheet first
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),

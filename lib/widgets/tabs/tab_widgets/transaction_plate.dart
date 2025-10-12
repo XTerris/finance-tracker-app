@@ -33,26 +33,24 @@ class TransactionPlate extends StatelessWidget {
           Text('Счет зачисления: ${transaction.toAccountId}'),
           TextButton(
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final transactionProvider = context.read<TransactionProvider>();
+              final accountProvider = context.read<AccountProvider>();
+
               try {
-                await context.read<TransactionProvider>().removeTransaction(
-                  transaction.id,
+                await transactionProvider.removeTransaction(transaction.id);
+                await accountProvider.update();
+
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Транзакция удалена')),
                 );
-                await context.read<AccountProvider>().update();
-                
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Транзакция удалена')),
-                  );
-                }
               } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(e.toString().replaceAll('Exception: ', '')),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString().replaceAll('Exception: ', '')),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             child: Text("Удалить"),

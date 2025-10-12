@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/transaction.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/transaction_provider.dart';
 import 'tab_widgets/transaction_plate.dart';
 
 class DashboardTab extends StatefulWidget {
@@ -131,18 +132,23 @@ class _DashboardTabState extends State<DashboardTab> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            for (var i = 0; i < 10; i++)
-              TransactionPlate(
-                transaction: Transaction(
-                  id: i,
-                  title: 'Transaction $i',
-                  amount: i * 100,
-                  doneAt: DateTime.now(),
-                  categoryId: 1,
-                  fromAccountId: 1,
-                  toAccountId: 2,
+            ...context
+                .watch<TransactionProvider>()
+                .transactions
+                .take(5)
+                .map(
+                  (transaction) => TransactionPlate(
+                    transaction: Transaction(
+                      id: transaction.id,
+                      title: transaction.title,
+                      amount: transaction.amount,
+                      doneAt: transaction.doneAt,
+                      categoryId: transaction.categoryId,
+                      fromAccountId: transaction.fromAccountId,
+                      toAccountId: transaction.toAccountId,
+                    ),
+                  ),
                 ),
-              ),
           ],
         ),
       ),
