@@ -28,7 +28,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Token"
+                                    "$ref": "#/components/schemas/TokenWithRefresh"
                                 }
                             }
                         }
@@ -44,6 +44,69 @@
                         }
                     }
                 }
+            }
+        },
+        "/refresh": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh Token",
+                "description": "Exchange a valid refresh token for a new access token and refresh token.\nThis invalidates the old refresh token (token rotation).",
+                "operationId": "refresh_token_refresh_post",
+                "parameters": [
+                    {
+                        "name": "refresh_token",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Refresh Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenWithRefresh"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout",
+                "description": "Logout by invalidating the user's refresh token.\nIncrements token version to invalidate all tokens.",
+                "operationId": "logout_logout_post",
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
             }
         },
         "/users/me": {
@@ -317,23 +380,6 @@
                         }
                     },
                     {
-                        "name": "search",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ],
-                            "default": "",
-                            "title": "Search"
-                        }
-                    },
-                    {
                         "name": "sort_by",
                         "in": "query",
                         "required": false,
@@ -353,6 +399,111 @@
                             "pattern": "^(asc|desc)$",
                             "default": "desc",
                             "title": "Sort Order"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransactionListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/updated": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get Updated Transactions Since",
+                "operationId": "get_updated_transactions_since_transactions_updated_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "updated_since",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Updated Since"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer"
+                                    },
+                                    "title": "Response Get Updated Transactions Since Transactions Updated Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/filter": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get Transactions By Filter",
+                "operationId": "get_transactions_by_filter_transactions_filter_get",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Search"
                         }
                     },
                     {
@@ -460,59 +611,11 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/TransactionListResponse"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/HTTPValidationError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions/updated": {
-            "get": {
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get Updated Transactions Since",
-                "operationId": "get_updated_transactions_since_transactions_updated_get",
-                "security": [
-                    {
-                        "OAuth2PasswordBearer": []
-                    }
-                ],
-                "parameters": [
-                    {
-                        "name": "updated_since",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time",
-                            "title": "Updated Since"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
                                     "type": "array",
                                     "items": {
                                         "type": "integer"
                                     },
-                                    "title": "Response Get Updated Transactions Since Transactions Updated Get"
+                                    "title": "Response Get Transactions By Filter Transactions Filter Get"
                                 }
                             }
                         }
@@ -1977,7 +2080,7 @@
                         "anyOf": [
                             {
                                 "type": "string",
-                                "pattern": "password"
+                                "pattern": "^password$"
                             },
                             {
                                 "type": "null"
@@ -1991,6 +2094,7 @@
                     },
                     "password": {
                         "type": "string",
+                        "format": "password",
                         "title": "Password"
                     },
                     "scope": {
@@ -2018,6 +2122,7 @@
                                 "type": "null"
                             }
                         ],
+                        "format": "password",
                         "title": "Client Secret"
                     }
                 },
@@ -2251,10 +2356,6 @@
                     "has_next": {
                         "type": "boolean",
                         "title": "Has Next"
-                    },
-                    "has_previous": {
-                        "type": "boolean",
-                        "title": "Has Previous"
                     }
                 },
                 "type": "object",
@@ -2262,8 +2363,7 @@
                     "total",
                     "limit",
                     "offset",
-                    "has_next",
-                    "has_previous"
+                    "has_next"
                 ],
                 "title": "PaginationInfo"
             },
@@ -2427,11 +2527,15 @@
                 "type": "object",
                 "title": "ReminderUpdate"
             },
-            "Token": {
+            "TokenWithRefresh": {
                 "properties": {
                     "access_token": {
                         "type": "string",
                         "title": "Access Token"
+                    },
+                    "refresh_token": {
+                        "type": "string",
+                        "title": "Refresh Token"
                     },
                     "token_type": {
                         "type": "string",
@@ -2441,9 +2545,10 @@
                 "type": "object",
                 "required": [
                     "access_token",
+                    "refresh_token",
                     "token_type"
                 ],
-                "title": "Token"
+                "title": "TokenWithRefresh"
             },
             "Transaction": {
                 "properties": {
@@ -2454,6 +2559,10 @@
                     "amount": {
                         "type": "number",
                         "title": "Amount"
+                    },
+                    "is_income": {
+                        "type": "boolean",
+                        "title": "Is Income"
                     },
                     "category_id": {
                         "type": "integer",
@@ -2471,28 +2580,17 @@
                         "type": "string",
                         "format": "date-time",
                         "title": "Done At"
-                    },
-                    "user": {
-                        "$ref": "#/components/schemas/User"
-                    },
-                    "category": {
-                        "$ref": "#/components/schemas/Category"
-                    },
-                    "account": {
-                        "$ref": "#/components/schemas/Account"
                     }
                 },
                 "type": "object",
                 "required": [
                     "title",
                     "amount",
+                    "is_income",
                     "category_id",
                     "account_id",
                     "id",
-                    "done_at",
-                    "user",
-                    "category",
-                    "account"
+                    "done_at"
                 ],
                 "title": "Transaction"
             },
@@ -2505,6 +2603,10 @@
                     "amount": {
                         "type": "number",
                         "title": "Amount"
+                    },
+                    "is_income": {
+                        "type": "boolean",
+                        "title": "Is Income"
                     },
                     "category_id": {
                         "type": "integer",
@@ -2531,6 +2633,7 @@
                 "required": [
                     "title",
                     "amount",
+                    "is_income",
                     "category_id",
                     "account_id"
                 ],
@@ -2579,6 +2682,17 @@
                             }
                         ],
                         "title": "Amount"
+                    },
+                    "is_income": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Income"
                     },
                     "category_id": {
                         "anyOf": [
