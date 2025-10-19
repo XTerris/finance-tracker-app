@@ -1,4 +1,5 @@
 import 'package:finance_tracker_app/providers/account_provider.dart';
+import 'package:finance_tracker_app/providers/goal_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -35,19 +36,22 @@ class _GoalsTabState extends State<GoalsTab> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
+          final accountProvider = context.read<AccountProvider>();
+          final goalProvider = context.read<GoalProvider>();
+
           try {
-            await context.read<AccountProvider>().update();
+            await accountProvider.update();
+            await goalProvider.update();
           } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Не удалось обновить данные. Проверьте подключение к интернету.',
-                  ),
-                  backgroundColor: Colors.orange,
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Не удалось обновить данные. Проверьте подключение к интернету.',
                 ),
-              );
-            }
+                backgroundColor: Colors.orange,
+              ),
+            );
           }
         },
         child: SingleChildScrollView(

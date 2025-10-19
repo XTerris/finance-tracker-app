@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../models/transaction.dart';
 import '../../../providers/account_provider.dart';
+import '../../../providers/goal_provider.dart';
 
 class TransactionPlate extends StatelessWidget {
   final Transaction transaction;
@@ -36,10 +37,12 @@ class TransactionPlate extends StatelessWidget {
               final messenger = ScaffoldMessenger.of(context);
               final transactionProvider = context.read<TransactionProvider>();
               final accountProvider = context.read<AccountProvider>();
+              final goalProvider = context.read<GoalProvider>();
 
               try {
                 await transactionProvider.removeTransaction(transaction.id);
                 await accountProvider.update();
+                await goalProvider.update();
 
                 messenger.showSnackBar(
                   const SnackBar(content: Text('Транзакция удалена')),

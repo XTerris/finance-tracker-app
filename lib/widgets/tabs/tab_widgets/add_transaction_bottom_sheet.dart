@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../providers/transaction_provider.dart';
 import '../../../providers/category_provider.dart';
 import '../../../providers/account_provider.dart';
+import '../../../providers/goal_provider.dart';
 
 enum TransactionType { expense, income, transfer }
 
@@ -170,6 +171,7 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
     try {
       final transactionProvider = context.read<TransactionProvider>();
       final accountProvider = context.read<AccountProvider>();
+      final goalProvider = context.read<GoalProvider>();
 
       await transactionProvider.addTransaction(
         title: _titleController.text.trim(),
@@ -180,8 +182,9 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
         doneAt: _selectedDate,
       );
 
-      // Update account balances after creating transaction
+      // Update account balances and goals after creating transaction
       await accountProvider.update();
+      await goalProvider.update();
 
       if (mounted) {
         navigator.pop();

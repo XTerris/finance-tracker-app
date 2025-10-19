@@ -6,13 +6,18 @@ import '../service_locator.dart';
 class TransactionProvider extends ChangeNotifier {
   List<Transaction> _transactions = [];
 
-  List<Transaction> get transactions => _transactions;
+  List<Transaction> get transactions {
+    // Sort by date, newest first
+    final sorted = List<Transaction>.from(_transactions);
+    sorted.sort((a, b) => b.doneAt.compareTo(a.doneAt));
+    return sorted;
+  }
 
   Future<void> init() async {
     // Initialize with data from cache
     _transactions = await serviceLocator.hiveService.getAllTransactions();
     notifyListeners();
-    
+
     // Try to update from server, but don't fail if offline
     try {
       await update();

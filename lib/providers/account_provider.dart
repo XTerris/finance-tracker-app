@@ -5,7 +5,12 @@ import '../service_locator.dart';
 class AccountProvider extends ChangeNotifier {
   Map<int, Account> _accounts = {};
 
-  List<Account> get accounts => _accounts.values.toList();
+  List<Account> get accounts {
+    // Sort alphabetically by name
+    final sorted = _accounts.values.toList();
+    sorted.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return sorted;
+  }
 
   Future<void> init() async {
     // Initialize with data from cache

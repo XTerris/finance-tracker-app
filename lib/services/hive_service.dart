@@ -3,6 +3,7 @@ import '../models/user.dart';
 import '../models/transaction.dart';
 import '../models/category.dart';
 import '../models/account.dart';
+import '../models/goal.dart';
 
 class HiveService {
   static const String _kvBoxName = 'key_value_store';
@@ -10,6 +11,7 @@ class HiveService {
   static const String _transactionBoxName = 'transactions';
   static const String _categoryBoxName = 'categories';
   static const String _accountBoxName = 'accounts';
+  static const String _goalBoxName = 'goals';
 
   static const String _currentUserKey = "currentUser";
   static const String _transactionsUpdateKey = "transactionsUpdate";
@@ -19,6 +21,7 @@ class HiveService {
   static late Box<Transaction> _transactionBox;
   static late Box<Category> _categoryBox;
   static late Box<Account> _accountBox;
+  static late Box<Goal> _goalBox;
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -36,6 +39,9 @@ class HiveService {
     if (!Hive.isAdapterRegistered(3)) {
       Hive.registerAdapter(AccountAdapter());
     }
+    if (!Hive.isAdapterRegistered(4)) {
+      Hive.registerAdapter(GoalAdapter());
+    }
 
     // Open boxes with types
     _userBox = await _openBoxSafely<User>(_userBoxName);
@@ -43,6 +49,7 @@ class HiveService {
     _transactionBox = await _openBoxSafely<Transaction>(_transactionBoxName);
     _categoryBox = await _openBoxSafely<Category>(_categoryBoxName);
     _accountBox = await _openBoxSafely<Account>(_accountBoxName);
+    _goalBox = await _openBoxSafely<Goal>(_goalBoxName);
   }
 
   static Future<Box<T>> _openBoxSafely<T>(String boxName) async {
@@ -144,11 +151,32 @@ class HiveService {
     await _accountBox.delete(id);
   }
 
+  Future<void> saveGoals(List<Goal> goals) async {
+    for (var goal in goals) {
+      final key = goal.id;
+      await _goalBox.put(key, goal);
+    }
+  }
+
+  Future<List<Goal>> getAllGoals() async {
+    final goals = _goalBox.values.toList();
+    return goals;
+  }
+
+  Future<void> clearAllGoals() async {
+    await _goalBox.clear();
+  }
+
+  Future<void> deleteGoal(int id) async {
+    await _goalBox.delete(id);
+  }
+
   Future<void> dispose() async {
     await _userBox.close();
     await _kvBox.close();
     await _transactionBox.close();
     await _categoryBox.close();
     await _accountBox.close();
+    await _goalBox.close();
   }
 }

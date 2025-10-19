@@ -4,6 +4,7 @@ import 'package:finance_tracker_app/models/user.dart';
 import 'package:finance_tracker_app/models/category.dart';
 import 'package:finance_tracker_app/models/transaction.dart';
 import 'package:finance_tracker_app/models/account.dart';
+import 'package:finance_tracker_app/models/goal.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_exceptions.dart';
@@ -22,6 +23,9 @@ class ApiService {
   String? _refreshToken;
   final String _baseUrl = 'http://$_defaultServerIp:$_defaultServerPort';
   bool _isRefreshing = false;
+
+  // Callback to notify when session expires
+  void Function()? onSessionExpired;
 
   factory ApiService() => _instance;
 
@@ -198,12 +202,15 @@ class ApiService {
             isRetry: true,
           );
         } catch (e) {
-          // If refresh fails, clear tokens and rethrow
+          // If refresh fails, clear tokens and notify session expired
           await clearToken();
+          onSessionExpired?.call();
           rethrow;
         }
       }
-      // If we can't refresh, rethrow the exception
+      // If we can't refresh, clear tokens and notify session expired
+      await clearToken();
+      onSessionExpired?.call();
       rethrow;
     }
   }
@@ -253,6 +260,7 @@ class ApiService {
         return token;
       } else if (response.statusCode == 401) {
         await clearToken();
+        onSessionExpired?.call();
         throw UnauthorizedException('Refresh token истек или недействителен');
       } else {
         throw ApiException(
@@ -414,6 +422,63 @@ class ApiService {
 
   Future<void> deleteAccount(int id) async {
     await _makeRequest(HttpMethod.delete, '/accounts/$id');
+  }
+
+  Future<List<Goal>> getAllGoals() async {
+    final data = await _makeRequest(HttpMethod.get, '/goals/');
+    return (data as List).map((e) => Goal.fromJson(e)).toList(growable: false);
+  }
+
+  Future<Goal> createGoal({
+    required int accountId,
+    required double targetAmount,
+    required DateTime deadline,
+  }) async {
+    final data = await _makeRequest(
+      HttpMethod.post,
+      '/goals/',
+      body: {
+        'account_id': accountId,
+        'target_amount': targetAmount,
+        'deadline': deadline.toIso8601String().split('T')[0],
+      },
+    );
+    return Goal.fromJson(data);
+  }
+
+  Future<Goal> updateGoal({
+    required int id,
+    int? accountId,
+    double? targetAmount,
+    DateTime? deadline,
+    bool? isCompleted,
+  }) async {
+    final data = await _makeRequest(
+      HttpMethod.put,
+      '/goals/$id',
+      body: {
+        if (accountId != null) 'account_id': accountId,
+        if (targetAmount != null) 'target_amount': targetAmount,
+        if (deadline != null)
+          'deadline': deadline.toIso8601String().split('T')[0],
+        if (isCompleted != null) 'is_completed': isCompleted,
+      },
+    );
+    return Goal.fromJson(data);
+  }
+
+  Future<Goal> markGoalComplete(int id) async {
+    final data = await _makeRequest(HttpMethod.patch, '/goals/$id/complete');
+    return Goal.fromJson(data);
+  }
+
+  Future<Goal> markGoalIncomplete(int id) async {
+    final data = await _makeRequest(HttpMethod.patch, '/goals/$id/incomplete');
+    return Goal.fromJson(data);
+  }
+
+  Future<void> deleteGoal(int id) async {
+    await _makeRequest(HttpMethod.delete, '/goals/$id');
   }
 
   void dispose() {

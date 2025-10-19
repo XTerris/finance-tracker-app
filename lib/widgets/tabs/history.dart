@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/account_provider.dart';
+import '../../providers/goal_provider.dart';
 import 'tab_widgets/transaction_plate.dart';
 import 'tab_widgets/add_transaction_bottom_sheet.dart';
 
@@ -22,11 +23,13 @@ class _HistoryTabState extends State<HistoryTab> {
           final transactionProvider = context.read<TransactionProvider>();
           final categoryProvider = context.read<CategoryProvider>();
           final accountProvider = context.read<AccountProvider>();
+          final goalProvider = context.read<GoalProvider>();
 
           try {
             await transactionProvider.update();
             await categoryProvider.update();
             await accountProvider.update();
+            await goalProvider.update();
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(

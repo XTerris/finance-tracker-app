@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../service_locator.dart';
+import '../services/api_exceptions.dart';
 
 class UserProvider extends ChangeNotifier {
   late User _currentUser;
@@ -10,6 +11,23 @@ class UserProvider extends ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isLoggedIn => _isLoggedIn;
   bool get isReady => _isReady;
+
+  UserProvider() {
+    // Set up callback for session expiration
+    serviceLocator.apiService.onSessionExpired = _handleSessionExpired;
+  }
+
+  void _handleSessionExpired() {
+    debugPrint('Session expired, logging out user');
+    _performLogout();
+  }
+
+  Future<void> _performLogout() async {
+    await serviceLocator.hiveService.clearCurrentUser();
+    await serviceLocator.hiveService.clearAllTransactions();
+    _isLoggedIn = false;
+    notifyListeners();
+  }
 
   Future<void> init() async {
     User? user = await serviceLocator.hiveService.getCurrentUser();
@@ -23,7 +41,12 @@ class UserProvider extends ChangeNotifier {
         final currentUser = await serviceLocator.apiService.getCurrentUser();
         _currentUser = currentUser;
         await serviceLocator.hiveService.saveCurrentUser(_currentUser);
+      } on UnauthorizedException catch (e) {
+        // Session expired, log out the user
+        debugPrint('Session expired during init: $e');
+        await _performLogout();
       } catch (e) {
+        // Other errors (like network issues) - keep user logged in with cached data
         debugPrint('Cannot verify session (offline?): $e');
         _isLoggedIn = true;
         _currentUser = user;

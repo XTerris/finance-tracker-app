@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/account_provider.dart';
+import '../../../providers/goal_provider.dart';
 
 class AddAccountBottomSheet extends StatefulWidget {
   const AddAccountBottomSheet({super.key});
@@ -34,17 +35,21 @@ class _AddAccountBottomSheetState extends State<AddAccountBottomSheet> {
 
     try {
       final accountProvider = context.read<AccountProvider>();
+      final goalProvider = context.read<GoalProvider>();
 
       await accountProvider.addAccount(
         _nameController.text.trim(),
         double.parse(_balanceController.text.trim()),
       );
 
+      // Update goals after creating account (in case goals are linked to accounts)
+      await goalProvider.update();
+
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Счёт успешно создан')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Счёт успешно создан')));
       }
     } catch (e) {
       if (mounted) {
