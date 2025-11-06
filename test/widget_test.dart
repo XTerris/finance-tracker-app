@@ -3,9 +3,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:finance_tracker_app/services/database_service.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize FFI for desktop testing
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+
+  setUp(() async {
+    // Reset database before each test for isolation
+    await DatabaseService.resetForTesting();
+  });
+
+  tearDown(() async {
+    // Clean up after each test
+    await DatabaseService.resetForTesting();
+  });
 
   test('Database service initializes correctly', () async {
     await DatabaseService.init();

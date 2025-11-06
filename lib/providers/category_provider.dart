@@ -14,6 +14,11 @@ class CategoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> update() async {
+    // Reload data from database
+    await init();
+  }
+
   Future<void> addCategory(String categoryName) async {
     final category = await serviceLocator.databaseService.createCategory(
       categoryName,

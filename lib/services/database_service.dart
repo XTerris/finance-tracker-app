@@ -104,9 +104,16 @@ class DatabaseService {
   }
 
   static Future<void> _createDefaultUserIfNeeded() async {
-    final users = await _instance.getAllUsers();
-    if (users.isEmpty) {
-      await _instance.createUser('Default User', 'user@local.app');
+    try {
+      final users = await _instance.getAllUsers();
+      if (users.isEmpty) {
+        await _instance.createUser('Default User', 'user@local.app');
+      }
+    } catch (e, stack) {
+      print('Error initializing default user: $e');
+      print(stack);
+      // Rethrow to prevent app from starting with corrupted database
+      rethrow;
     }
   }
 
@@ -423,7 +430,16 @@ class DatabaseService {
   }
 
   Future<void> dispose() async {
-    await _database?.close();
+    if (_database == null) return;
+    await _database!.close();
     _database = null;
+  }
+
+  /// Reset database state for testing purposes
+  static Future<void> resetForTesting() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
   }
 }

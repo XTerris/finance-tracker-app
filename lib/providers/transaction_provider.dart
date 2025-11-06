@@ -18,6 +18,11 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> update() async {
+    // Reload data from database
+    await init();
+  }
+
   Future<void> addTransaction({
     required String title,
     required double amount,
