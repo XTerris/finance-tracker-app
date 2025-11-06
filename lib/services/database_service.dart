@@ -1,4 +1,3 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:io' show Platform;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -146,11 +145,10 @@ class DatabaseService {
   }
 
   Future<User> createUser(String name, String email) async {
-    final id = await _db.insert(
-      _userTable,
-      {'name': name, 'email': email},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final id = await _db.insert(_userTable, {
+      'name': name,
+      'email': email,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     return User(id: id, name: name, email: email);
   }
 
@@ -158,28 +156,19 @@ class DatabaseService {
   Future<List<Category>> getAllCategories() async {
     final List<Map<String, dynamic>> maps = await _db.query(_categoryTable);
     return List.generate(maps.length, (i) {
-      return Category(
-        id: maps[i]['id'],
-        name: maps[i]['name'],
-      );
+      return Category(id: maps[i]['id'], name: maps[i]['name']);
     });
   }
 
   Future<Category> createCategory(String name) async {
-    final id = await _db.insert(
-      _categoryTable,
-      {'name': name},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final id = await _db.insert(_categoryTable, {
+      'name': name,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     return Category(id: id, name: name);
   }
 
   Future<void> deleteCategory(int id) async {
-    await _db.delete(
-      _categoryTable,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.delete(_categoryTable, where: 'id = ?', whereArgs: [id]);
   }
 
   // Account operations
@@ -195,11 +184,10 @@ class DatabaseService {
   }
 
   Future<Account> createAccount(String name, double initialBalance) async {
-    final id = await _db.insert(
-      _accountTable,
-      {'name': name, 'balance': initialBalance},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final id = await _db.insert(_accountTable, {
+      'name': name,
+      'balance': initialBalance,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     return Account(id: id, name: name, balance: initialBalance);
   }
 
@@ -222,12 +210,7 @@ class DatabaseService {
     if (name != null) updates['name'] = name;
     if (balance != null) updates['balance'] = balance;
 
-    await _db.update(
-      _accountTable,
-      updates,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.update(_accountTable, updates, where: 'id = ?', whereArgs: [id]);
 
     final updated = await _db.query(
       _accountTable,
@@ -243,11 +226,7 @@ class DatabaseService {
   }
 
   Future<void> deleteAccount(int id) async {
-    await _db.delete(
-      _accountTable,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.delete(_accountTable, where: 'id = ?', whereArgs: [id]);
   }
 
   // Transaction operations
@@ -296,18 +275,14 @@ class DatabaseService {
     int? fromAccountId,
     int? toAccountId,
   }) async {
-    final id = await _db.insert(
-      _transactionTable,
-      {
-        'title': title,
-        'amount': amount,
-        'done_at': (doneAt ?? DateTime.now()).toIso8601String(),
-        'category_id': categoryId,
-        'from_account_id': fromAccountId,
-        'to_account_id': toAccountId,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final id = await _db.insert(_transactionTable, {
+      'title': title,
+      'amount': amount,
+      'done_at': (doneAt ?? DateTime.now()).toIso8601String(),
+      'category_id': categoryId,
+      'from_account_id': fromAccountId,
+      'to_account_id': toAccountId,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     return getTransaction(id);
   }
@@ -332,11 +307,7 @@ class DatabaseService {
   }
 
   Future<void> deleteTransaction(int id) async {
-    await _db.delete(
-      _transactionTable,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.delete(_transactionTable, where: 'id = ?', whereArgs: [id]);
   }
 
   // Goal operations
@@ -358,16 +329,12 @@ class DatabaseService {
     required double targetAmount,
     required DateTime deadline,
   }) async {
-    final id = await _db.insert(
-      _goalTable,
-      {
-        'account_id': accountId,
-        'target_amount': targetAmount,
-        'deadline': deadline.toIso8601String().split('T')[0],
-        'is_completed': 0,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final id = await _db.insert(_goalTable, {
+      'account_id': accountId,
+      'target_amount': targetAmount,
+      'deadline': deadline.toIso8601String().split('T')[0],
+      'is_completed': 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     final result = await _db.query(
       _goalTable,
@@ -399,12 +366,7 @@ class DatabaseService {
     }
     if (isCompleted != null) updates['is_completed'] = isCompleted ? 1 : 0;
 
-    await _db.update(
-      _goalTable,
-      updates,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.update(_goalTable, updates, where: 'id = ?', whereArgs: [id]);
 
     final result = await _db.query(
       _goalTable,
@@ -422,11 +384,7 @@ class DatabaseService {
   }
 
   Future<void> deleteGoal(int id) async {
-    await _db.delete(
-      _goalTable,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.delete(_goalTable, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> dispose() async {
