@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:io' show Platform;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../models/user.dart';
 import '../models/transaction.dart' as models;
 import '../models/category.dart';
@@ -25,6 +27,12 @@ class DatabaseService {
 
   static Future<void> init() async {
     if (_database != null) return;
+
+    // Initialize FFI for desktop platforms
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
 
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, _databaseName);
