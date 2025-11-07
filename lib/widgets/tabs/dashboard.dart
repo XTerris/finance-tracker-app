@@ -20,7 +20,10 @@ class _DashboardTabState extends State<DashboardTab> {
   // Calculate expenses for last month
   double _calculateLastMonthExpenses(List<Transaction> transactions) {
     final now = DateTime.now();
-    final lastMonth = DateTime(now.year, now.month - 1, 1);
+    // Handle year boundary: if current month is January, go back to December of previous year
+    final lastMonth = now.month == 1 
+        ? DateTime(now.year - 1, 12, 1)
+        : DateTime(now.year, now.month - 1, 1);
     final lastMonthEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
     
     double total = 0.0;
