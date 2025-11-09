@@ -19,12 +19,10 @@ class DashboardTab extends StatefulWidget {
 
 /// Helper class to hold calculated dashboard statistics
 class _DashboardStats {
-  final double lastMonthExpenses;
   final double currentMonthExpenses;
   final double currentMonthIncome;
 
   _DashboardStats({
-    required this.lastMonthExpenses,
     required this.currentMonthExpenses,
     required this.currentMonthIncome,
   });
@@ -34,13 +32,11 @@ class _DashboardStats {
       identical(this, other) ||
       other is _DashboardStats &&
           runtimeType == other.runtimeType &&
-          lastMonthExpenses == other.lastMonthExpenses &&
           currentMonthExpenses == other.currentMonthExpenses &&
           currentMonthIncome == other.currentMonthIncome;
 
   @override
   int get hashCode =>
-      lastMonthExpenses.hashCode ^
       currentMonthExpenses.hashCode ^
       currentMonthIncome.hashCode;
 }
@@ -49,27 +45,12 @@ class _DashboardTabState extends State<DashboardTab> {
   // Calculate all dashboard statistics from transactions
   _DashboardStats _calculateDashboardStats(List<Transaction> transactions) {
     final now = DateTime.now();
-    // Handle year boundary: if current month is January, go back to December of previous year
-    final lastMonth = now.month == 1 
-        ? DateTime(now.year - 1, 12, 1)
-        : DateTime(now.year, now.month - 1, 1);
-    final lastMonthEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
     final currentMonthStart = DateTime(now.year, now.month, 1);
     
-    double lastMonthExpenses = 0.0;
     double currentMonthExpenses = 0.0;
     double currentMonthIncome = 0.0;
 
     for (var transaction in transactions) {
-      // Last month expenses
-      // Use !isBefore and !isAfter to include boundary transactions
-      if (!transaction.doneAt.isBefore(lastMonth) && 
-          !transaction.doneAt.isAfter(lastMonthEnd) &&
-          transaction.fromAccountId != null && 
-          transaction.toAccountId == null) {
-        lastMonthExpenses += transaction.amount.abs();
-      }
-
       // Current month expenses
       // Use !isBefore to include transactions at exact start of month
       if (!transaction.doneAt.isBefore(currentMonthStart) &&
@@ -88,7 +69,6 @@ class _DashboardTabState extends State<DashboardTab> {
     }
 
     return _DashboardStats(
-      lastMonthExpenses: lastMonthExpenses,
       currentMonthExpenses: currentMonthExpenses,
       currentMonthIncome: currentMonthIncome,
     );
@@ -174,66 +154,16 @@ class _DashboardTabState extends State<DashboardTab> {
             
             SizedBox(height: 16),
             
-            // Last Month Expenses & Current Month Stats
+            // Current Month Stats
             Selector<TransactionProvider, _DashboardStats>(
               selector: (context, transactionProvider) => 
                   _calculateDashboardStats(transactionProvider.transactions),
               builder: (context, stats, child) {
-                final lastMonthExpenses = stats.lastMonthExpenses;
                 final currentMonthExpenses = stats.currentMonthExpenses;
                 final currentMonthIncome = stats.currentMonthIncome;
                 
                 return Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.secondaryContainer,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.calendar_month, size: 20, color: Theme.of(context).colorScheme.primary),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Прошлый месяц',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12),
-                                Text(
-                                  'Расходы',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  currencyFormat.format(lastMonthExpenses),
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red[700],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
