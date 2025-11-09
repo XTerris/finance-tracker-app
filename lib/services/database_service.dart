@@ -303,8 +303,18 @@ class DatabaseService {
       for (final accountId in accountsToValidate) {
         final isValid = await _validateAccountBalanceHistory(txn, accountId);
         if (!isValid) {
+          // Get account name for better error message
+          final accountQuery = await txn.query(
+            _accountTable,
+            where: 'id = ?',
+            whereArgs: [accountId],
+          );
+          final accountName = accountQuery.isNotEmpty 
+              ? accountQuery[0]['name'] as String 
+              : 'Unknown Account';
+          
           throw Exception(
-              'Transaction would cause account balance to become negative at some point in history. Transaction rejected.');
+              'Transaction would cause account "$accountName" balance to become negative at some point in history. Transaction rejected.');
         }
       }
 
@@ -413,14 +423,24 @@ class DatabaseService {
       for (final accountId in accountsToValidate) {
         final isValid = await _validateAccountBalanceHistory(txn, accountId);
         if (!isValid) {
+          // Get account name for better error message
+          final accountQuery = await txn.query(
+            _accountTable,
+            where: 'id = ?',
+            whereArgs: [accountId],
+          );
+          final accountName = accountQuery.isNotEmpty 
+              ? accountQuery[0]['name'] as String 
+              : 'Unknown Account';
+          
           throw Exception(
-              'Deleting this transaction would cause account balance to become negative at some point in history. Deletion rejected.');
+              'Deleting this transaction would cause account "$accountName" balance to become negative at some point in history. Deletion rejected.');
         }
       }
     });
   }
 
-  // Helper method to update account balance within a transaction
+  /// Helper method to update account balance within a transaction
   Future<void> _updateAccountBalance(
       DatabaseExecutor txn, int accountId, double amountChange) async {
     await txn.rawUpdate('''
