@@ -189,6 +189,14 @@ class _DashboardTabState extends State<DashboardTab> {
                                     ),
                                   ],
                                 ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'за текущий месяц',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
                                 SizedBox(height: 8),
                                 Text(
                                   currencyFormat.format(currentMonthIncome),
@@ -225,6 +233,14 @@ class _DashboardTabState extends State<DashboardTab> {
                                       ),
                                     ),
                                   ],
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'за текущий месяц',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
