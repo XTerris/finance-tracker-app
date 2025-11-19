@@ -151,7 +151,7 @@ class _ReportsTabState extends State<ReportsTab> {
         // Calculate average monthly expense
         final daysDiff = _endDate.difference(_startDate).inDays;
         final monthsDiff = daysDiff / 30.0;
-        final avgMonthlyExpense = monthsDiff > 0 ? stats['expense']! / monthsDiff : 0;
+        final avgMonthlyExpense = monthsDiff > 0 ? stats['expense']! / monthsDiff : 0.0;
 
         return SingleChildScrollView(
           child: Padding(
@@ -564,7 +564,7 @@ class _ReportsTabState extends State<ReportsTab> {
         final daysDiff = _endDate.difference(_startDate).inDays;
         final monthsDiff = daysDiff / 30.0;
         final avgMonthlyExpense =
-            monthsDiff > 0 ? stats['expense']! / monthsDiff : 0;
+            monthsDiff > 0 ? stats['expense']! / monthsDiff : 0.0;
 
         return SingleChildScrollView(
           child: Padding(
