@@ -227,16 +227,6 @@ class _ReportsTabState extends State<ReportsTab> {
                         'Всего расходов: ${_formatCurrency(stats['expense']!)}',
                         style: const TextStyle(fontSize: 14),
                       ),
-                      Text(
-                        'Баланс: ${_formatCurrency(stats['balance']!)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: stats['balance']! >= 0
-                              ? Colors.green
-                              : Colors.red,
-                        ),
-                      ),
                     ],
                   ),
                 ),
