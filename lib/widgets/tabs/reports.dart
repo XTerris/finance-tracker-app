@@ -461,19 +461,32 @@ class _ReportsTabState extends State<ReportsTab> {
           }
         } else {
           // Calculate expenses by day for bar and line charts
+          // First, create a map with all days in the period (with 0 values)
+          final Map<String, double> allDaysMap = {};
+          DateTime currentDate = DateTime(_startDate.year, _startDate.month, _startDate.day);
+          final endDate = DateTime(_endDate.year, _endDate.month, _endDate.day);
+          
+          while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+            final dateKey = DateFormat('dd.MM.yyyy').format(currentDate);
+            allDaysMap[dateKey] = 0.0;
+            currentDate = currentDate.add(const Duration(days: 1));
+          }
+          
+          // Then, fill in actual transaction amounts
           for (var transaction in filteredTransactions) {
             final hasFromAccount = transaction.fromAccountId != null;
             final hasToAccount = transaction.toAccountId != null;
             
             if (hasFromAccount && !hasToAccount) {
               final dateKey = DateFormat('dd.MM.yyyy').format(transaction.doneAt);
-              chartData[dateKey] =
-                  (chartData[dateKey] ?? 0) + transaction.amount;
+              if (allDaysMap.containsKey(dateKey)) {
+                allDaysMap[dateKey] = allDaysMap[dateKey]! + transaction.amount;
+              }
             }
           }
           
           // Sort by date
-          final sortedEntries = chartData.entries.toList()
+          final sortedEntries = allDaysMap.entries.toList()
             ..sort((a, b) {
               final dateA = DateFormat('dd.MM.yyyy').parse(a.key);
               final dateB = DateFormat('dd.MM.yyyy').parse(b.key);
@@ -534,39 +547,11 @@ class _ReportsTabState extends State<ReportsTab> {
                       else if (_selectedChartType == ChartType.bar)
                         // Bar chart visualization for daily expenses
                         _buildBarChart(chartData)
+                      else if (_selectedChartType == ChartType.pie)
+                        // Pie chart visualization for expenses by category
+                        _buildPieChart(chartData)
                       else
-                        // Simple progress bar representation for pie chart
-                        ...chartData.entries.map((entry) {
-                          final total = chartData.values
-                              .fold<double>(0, (sum, val) => sum + val);
-                          final percentage = (entry.value / total * 100);
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(entry.key),
-                                    Text(_formatCurrency(entry.value)),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                LinearProgressIndicator(
-                                  value: percentage / 100,
-                                  minHeight: 8,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                Text(
-                                  '${percentage.toStringAsFixed(1)}%',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                        const Text('Неизвестный тип диаграммы'),
                     ],
                   ),
                 ),
@@ -940,6 +925,126 @@ class _ReportsTabState extends State<ReportsTab> {
             _buildStatChip('Максимум', _formatCurrency(maxY)),
             _buildStatChip('Минимум', _formatCurrency(minY)),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPieChart(Map<String, double> chartData) {
+    if (chartData.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text('Нет данных для отображения'),
+        ),
+      );
+    }
+
+    // Calculate total for percentages
+    final total = chartData.values.fold<double>(0, (sum, val) => sum + val);
+    
+    // Create pie chart sections
+    final List<PieChartSectionData> sections = [];
+    final List<Color> colors = [
+      Colors.blue,
+      Colors.red,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.amber,
+      Colors.cyan,
+      Colors.indigo,
+    ];
+    
+    int colorIndex = 0;
+    chartData.forEach((category, amount) {
+      final percentage = (amount / total * 100);
+      sections.add(
+        PieChartSectionData(
+          value: amount,
+          title: '${percentage.toStringAsFixed(1)}%',
+          color: colors[colorIndex % colors.length],
+          radius: 110,
+          titleStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      );
+      colorIndex++;
+    });
+    
+    return Column(
+      children: [
+        SizedBox(
+          height: 300,
+          child: PieChart(
+            PieChartData(
+              sections: sections,
+              sectionsSpace: 2,
+              centerSpaceRadius: 40,
+              pieTouchData: PieTouchData(
+                enabled: true,
+                touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                  // Touch handling can be added here if needed
+                },
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Legend
+        Wrap(
+          spacing: 16,
+          runSpacing: 12,
+          alignment: WrapAlignment.center,
+          children: chartData.entries.toList().asMap().entries.map((entry) {
+            final index = entry.key;
+            final mapEntry = entry.value;
+            final color = colors[index % colors.length];
+            final percentage = (mapEntry.value / total * 100);
+            
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        mapEntry.key,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${_formatCurrency(mapEntry.value)} (${percentage.toStringAsFixed(1)}%)',
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
