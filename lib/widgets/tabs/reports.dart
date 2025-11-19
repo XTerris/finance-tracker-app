@@ -76,11 +76,18 @@ class _ReportsTabState extends State<ReportsTab> {
       final date = transaction.doneAt;
       if (date.isAfter(_startDate.subtract(const Duration(days: 1))) &&
           date.isBefore(_endDate.add(const Duration(days: 1)))) {
-        if (transaction.amount > 0) {
+        // Determine transaction type based on account IDs
+        final hasFromAccount = transaction.fromAccountId != null;
+        final hasToAccount = transaction.toAccountId != null;
+        
+        if (hasToAccount && !hasFromAccount) {
+          // Income: money coming into an account
           totalIncome += transaction.amount;
-        } else {
-          totalExpense += transaction.amount.abs();
+        } else if (hasFromAccount && !hasToAccount) {
+          // Expense: money leaving an account
+          totalExpense += transaction.amount;
         }
+        // Transfers (both accounts set) are not counted in income/expense
       }
     }
 
@@ -427,7 +434,12 @@ class _ReportsTabState extends State<ReportsTab> {
         // Calculate expenses by category
         Map<String, double> expensesByCategory = {};
         for (var transaction in filteredTransactions) {
-          if (transaction.amount < 0) {
+          // Check if this is an expense (has fromAccount but no toAccount)
+          final hasFromAccount = transaction.fromAccountId != null;
+          final hasToAccount = transaction.toAccountId != null;
+          
+          if (hasFromAccount && !hasToAccount) {
+            // This is an expense
             String categoryName = 'Неизвестная категория';
             
             if (categories.isNotEmpty) {
@@ -444,7 +456,7 @@ class _ReportsTabState extends State<ReportsTab> {
             
             expensesByCategory[categoryName] =
                 (expensesByCategory[categoryName] ?? 0) +
-                    transaction.amount.abs();
+                    transaction.amount;
           }
         }
 
