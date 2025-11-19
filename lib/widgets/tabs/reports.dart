@@ -531,8 +531,11 @@ class _ReportsTabState extends State<ReportsTab> {
                       else if (_selectedChartType == ChartType.line)
                         // Line chart visualization for daily expenses
                         _buildLineChart(chartData)
+                      else if (_selectedChartType == ChartType.bar)
+                        // Bar chart visualization for daily expenses
+                        _buildBarChart(chartData)
                       else
-                        // Simple bar representation for pie and bar charts
+                        // Simple progress bar representation for pie chart
                         ...chartData.entries.map((entry) {
                           final total = chartData.values
                               .fold<double>(0, (sum, val) => sum + val);
@@ -781,6 +784,164 @@ class _ReportsTabState extends State<ReportsTab> {
         style: const TextStyle(fontSize: 12),
       ),
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+    );
+  }
+
+  Widget _buildBarChart(Map<String, double> chartData) {
+    if (chartData.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text('Нет данных для отображения'),
+        ),
+      );
+    }
+
+    // Parse dates and create bar groups
+    final List<BarChartGroupData> barGroups = [];
+    final List<DateTime> dates = [];
+    final List<double> amounts = [];
+    
+    chartData.forEach((dateStr, amount) {
+      final date = DateFormat('dd.MM.yyyy').parse(dateStr);
+      dates.add(date);
+      amounts.add(amount);
+    });
+    
+    // Create bar groups with index as X
+    for (int i = 0; i < dates.length; i++) {
+      barGroups.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: amounts[i],
+              color: Theme.of(context).colorScheme.primary,
+              width: 16,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // Find max for better scaling
+    final maxY = amounts.reduce((a, b) => a > b ? a : b);
+    final minY = amounts.reduce((a, b) => a < b ? a : b);
+    
+    return Column(
+      children: [
+        SizedBox(
+          height: 300,
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              maxY: maxY * 1.2,
+              minY: 0,
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: maxY > 0 ? maxY / 5 : 1,
+                getDrawingHorizontalLine: (value) {
+                  return FlLine(
+                    color: Colors.grey.withOpacity(0.3),
+                    strokeWidth: 1,
+                  );
+                },
+              ),
+              titlesData: FlTitlesData(
+                show: true,
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.toInt();
+                      if (index < 0 || index >= dates.length) {
+                        return const Text('');
+                      }
+                      // Show date in short format
+                      final date = dates[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          DateFormat('dd.MM').format(date),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: maxY > 0 ? maxY / 5 : 1,
+                    reservedSize: 60,
+                    getTitlesWidget: (value, meta) {
+                      return Text(
+                        _formatCurrency(value),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              borderData: FlBorderData(
+                show: true,
+                border: Border.all(color: Colors.grey.withOpacity(0.3)),
+              ),
+              barGroups: barGroups,
+              barTouchData: BarTouchData(
+                enabled: true,
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    if (groupIndex < 0 || groupIndex >= dates.length) {
+                      return null;
+                    }
+                    final date = dates[groupIndex];
+                    final amount = rod.toY;
+                    return BarTooltipItem(
+                      '${DateFormat('dd.MM.yyyy').format(date)}\n${_formatCurrency(amount)}',
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Show summary statistics
+        Wrap(
+          spacing: 16,
+          runSpacing: 8,
+          children: [
+            _buildStatChip('Всего дней', dates.length.toString()),
+            _buildStatChip('Средний расход', _formatCurrency(amounts.reduce((a, b) => a + b) / amounts.length)),
+            _buildStatChip('Максимум', _formatCurrency(maxY)),
+            _buildStatChip('Минимум', _formatCurrency(minY)),
+          ],
+        ),
+      ],
     );
   }
 
