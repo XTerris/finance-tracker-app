@@ -340,7 +340,7 @@ class TransactionPlate extends StatelessWidget {
                     await goalProvider.update();
 
                     messenger.showSnackBar(
-                      const SnackBar(content: Text('Транзакция удалена')),
+                      const SnackBar(content: Text('Операция удалена')),
                     );
                   } catch (e) {
                     messenger.showSnackBar(
