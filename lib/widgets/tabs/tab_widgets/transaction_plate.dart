@@ -17,19 +17,25 @@ class TransactionPlate extends StatelessWidget {
   String _getAccountName(AccountProvider accountProvider, int? accountId) {
     if (accountId == null) return '—';
     
-    final account = accountProvider.accounts.firstWhere(
-      (acc) => acc.id == accountId,
-      orElse: () => throw Exception('Account not found'),
-    );
-    return account.name;
+    try {
+      final account = accountProvider.accounts.firstWhere(
+        (acc) => acc.id == accountId,
+      );
+      return account.name;
+    } catch (e) {
+      return '—';
+    }
   }
 
   String _getCategoryName(CategoryProvider categoryProvider, int categoryId) {
-    final category = categoryProvider.categories.firstWhere(
-      (cat) => cat.id == categoryId,
-      orElse: () => throw Exception('Category not found'),
-    );
-    return category.name;
+    try {
+      final category = categoryProvider.categories.firstWhere(
+        (cat) => cat.id == categoryId,
+      );
+      return category.name;
+    } catch (e) {
+      return 'Не указана';
+    }
   }
 
   Widget _buildTransactionTypeIndicator() {
@@ -185,12 +191,6 @@ class TransactionPlate extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.attach_money,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                SizedBox(width: 4),
                 Text(
                   '${transaction.amount.toStringAsFixed(2)} ₽',
                   style: TextStyle(
