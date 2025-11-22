@@ -38,6 +38,15 @@ class TransactionPlate extends StatelessWidget {
     }
   }
 
+  String _formatAmount(double amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 2,
+    );
+    return formatter.format(amount);
+  }
+
   Widget _buildTransactionTypeIndicator() {
     // Determine transaction type based on accounts
     final bool hasFrom = transaction.fromAccountId != null;
@@ -194,7 +203,7 @@ class TransactionPlate extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '${transaction.amount.toStringAsFixed(2)} ₽',
+                  _formatAmount(transaction.amount),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,

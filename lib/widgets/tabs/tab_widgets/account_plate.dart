@@ -15,7 +15,11 @@ class AccountPlate extends StatelessWidget {
   const AccountPlate({super.key, required this.account, this.margin});
 
   String _formatBalance(double balance) {
-    final formatter = NumberFormat.currency(symbol: '₽', decimalDigits: 2);
+    final formatter = NumberFormat.currency(
+      locale: 'ru_RU',
+      symbol: '₽',
+      decimalDigits: 2,
+    );
     return formatter.format(balance);
   }
 
