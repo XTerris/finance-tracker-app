@@ -181,17 +181,19 @@ class TransactionPlate extends StatelessWidget {
           ),
           SizedBox(height: 12),
 
-          // Amount with styled display
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
+          // Amount and Category row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Amount with styled display
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
                   '${transaction.amount.toStringAsFixed(2)} ₽',
                   style: TextStyle(
                     fontSize: 20,
@@ -199,33 +201,31 @@ class TransactionPlate extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-              ],
-            ),
-          ),
-          SizedBox(height: 12),
-
-          // Category
-          Row(
-            children: [
-              Icon(Icons.category, size: 16, color: Colors.grey[600]),
-              SizedBox(width: 8),
-              Text(
-                'Категория: ',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
               ),
-              Text(
-                categoryName,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+              
+              // Category on the right
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.category, size: 16, color: Colors.grey[600]),
+                    SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        categoryName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 12),
 
           // From Account (if exists)
           if (transaction.fromAccountId != null) ...[
