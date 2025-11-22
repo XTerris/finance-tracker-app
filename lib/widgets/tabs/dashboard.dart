@@ -76,6 +76,21 @@ class _DashboardTabState extends State<DashboardTab> {
     return accounts.fold(0.0, (sum, account) => sum + account.balance);
   }
 
+  // Get time-based greeting
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    
+    if (hour >= 6 && hour < 12) {
+      return 'Доброе утро!';
+    } else if (hour >= 12 && hour < 18) {
+      return 'Добрый день!';
+    } else if (hour >= 18 && hour < 23) {
+      return 'Добрый вечер!';
+    } else {
+      return 'Доброй ночи!';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(
@@ -97,7 +112,7 @@ class _DashboardTabState extends State<DashboardTab> {
               children: [
                 Expanded(
                   child: Text(
-                    'Добрый день!',
+                    _getGreeting(),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
