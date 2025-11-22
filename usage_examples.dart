@@ -1,21 +1,25 @@
 // Example Usage Scenario - Demonstrating Balance Management
 // This file shows how the balance management works in practice
 
+import 'package:finance_tracker_app/services/database_service.dart';
+
 // SCENARIO 1: Basic Transaction Creation
 // ======================================
 
-void scenario1_basicTransaction() async {
+void scenario1BasicTransaction() async {
+  await DatabaseService.init();
   final dbService = DatabaseService();
   
   // Create an account with $1000
   final account = await dbService.createAccount('Checking', 1000.0);
+  // ignore: avoid_print
   print('Initial balance: \$${account.balance}'); // Output: $1000
   
   // Create a category
   final category = await dbService.createCategory('Groceries');
   
   // Add an expense transaction
-  final transaction = await dbService.createTransaction(
+  await dbService.createTransaction(
     title: 'Weekly Shopping',
     amount: 150.0,
     categoryId: category.id,
@@ -25,6 +29,7 @@ void scenario1_basicTransaction() async {
   // Check the balance - it should now be $850
   final accounts = await dbService.getAllAccounts();
   final updatedAccount = accounts.firstWhere((a) => a.id == account.id);
+  // ignore: avoid_print
   print('Balance after expense: \$${updatedAccount.balance}'); // Output: $850
   
   // ✅ RESULT: Balance automatically updated!
@@ -33,7 +38,8 @@ void scenario1_basicTransaction() async {
 // SCENARIO 2: Historical Transaction Validation
 // =============================================
 
-void scenario2_historicalValidation() async {
+void scenario2HistoricalValidation() async {
+  await DatabaseService.init();
   final dbService = DatabaseService();
   
   // Create an account with $1000
@@ -62,8 +68,10 @@ void scenario2_historicalValidation() async {
       fromAccountId: account.id,
       doneAt: now.subtract(Duration(days: 1)),
     );
+    // ignore: avoid_print
     print('Transaction succeeded - ERROR!');
   } catch (e) {
+    // ignore: avoid_print
     print('Transaction rejected: $e');
     // Output: Transaction would cause account "Checking" balance to become 
     //         negative at some point in history. Transaction rejected.
@@ -77,7 +85,8 @@ void scenario2_historicalValidation() async {
 // SCENARIO 3: Transfer Between Accounts
 // =====================================
 
-void scenario3_transfer() async {
+void scenario3Transfer() async {
+  await DatabaseService.init();
   final dbService = DatabaseService();
   
   // Create two accounts
@@ -99,7 +108,9 @@ void scenario3_transfer() async {
   final updatedChecking = accounts.firstWhere((a) => a.id == checking.id);
   final updatedSavings = accounts.firstWhere((a) => a.id == savings.id);
   
+  // ignore: avoid_print
   print('Checking balance: \$${updatedChecking.balance}'); // Output: $700
+  // ignore: avoid_print
   print('Savings balance: \$${updatedSavings.balance}');   // Output: $800
   
   // ✅ RESULT: Both accounts updated correctly!
@@ -108,7 +119,8 @@ void scenario3_transfer() async {
 // SCENARIO 4: Transaction Deletion Validation
 // ==========================================
 
-void scenario4_deletionValidation() async {
+void scenario4DeletionValidation() async {
+  await DatabaseService.init();
   final dbService = DatabaseService();
   
   // Create account starting at $0
@@ -140,8 +152,10 @@ void scenario4_deletionValidation() async {
   // Try to delete the income transaction
   try {
     await dbService.deleteTransaction(incomeTransaction.id);
+    // ignore: avoid_print
     print('Deletion succeeded - ERROR!');
   } catch (e) {
+    // ignore: avoid_print
     print('Deletion rejected: $e');
     // Output: Deleting this transaction would cause account "Checking" balance 
     //         to become negative at some point in history. Deletion rejected.
@@ -155,7 +169,8 @@ void scenario4_deletionValidation() async {
 // SCENARIO 5: Valid Historical Transaction
 // =======================================
 
-void scenario5_validHistorical() async {
+void scenario5ValidHistorical() async {
+  await DatabaseService.init();
   final dbService = DatabaseService();
   
   // Create an account with $1000
@@ -188,6 +203,7 @@ void scenario5_validHistorical() async {
   // Check final balance
   final accounts = await dbService.getAllAccounts();
   final updatedAccount = accounts.firstWhere((a) => a.id == account.id);
+  // ignore: avoid_print
   print('Final balance: \$${updatedAccount.balance}'); // Output: $850
   
   // Balance history: $1000 → $950 (yesterday) → $850 (today)
@@ -199,7 +215,8 @@ void scenario5_validHistorical() async {
 // SCENARIO 6: Complex Multi-Transaction History
 // ============================================
 
-void scenario6_complexHistory() async {
+void scenario6ComplexHistory() async {
+  await DatabaseService.init();
   final dbService = DatabaseService();
   
   final account = await dbService.createAccount('Checking', 500.0);
@@ -239,6 +256,7 @@ void scenario6_complexHistory() async {
   // Check final balance
   final accounts = await dbService.getAllAccounts();
   final updatedAccount = accounts.firstWhere((a) => a.id == account.id);
+  // ignore: avoid_print
   print('Final balance: \$${updatedAccount.balance}'); // Output: $420
   
   // Balance history (chronological):
