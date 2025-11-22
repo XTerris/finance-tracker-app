@@ -29,7 +29,9 @@ class _EditTransactionBottomSheetState
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.transaction.title);
-    _amountController = TextEditingController(text: widget.transaction.amount.toString());
+    _amountController = TextEditingController(
+      text: widget.transaction.amount.toString(),
+    );
     _selectedCategoryId = widget.transaction.categoryId;
   }
 
@@ -247,10 +249,12 @@ class _EditTransactionBottomSheetState
                 decoration: const InputDecoration(
                   labelText: 'Сумма',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.numbers),
+                  prefixIcon: Icon(Icons.onetwothree),
                   suffixText: '₽',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Пожалуйста, введите сумму';
