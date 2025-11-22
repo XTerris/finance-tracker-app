@@ -303,60 +303,68 @@ class TransactionPlate extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton.icon(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                    ),
-                    builder:
-                        (context) => EditTransactionBottomSheet(
-                          transaction: transaction,
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
                         ),
-                  );
-                },
-                icon: Icon(Icons.edit, size: 18),
-                label: Text("Изменить"),
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      builder:
+                          (context) => EditTransactionBottomSheet(
+                            transaction: transaction,
+                          ),
+                    );
+                  },
+                  icon: Icon(Icons.edit, size: 20),
+                  color: Theme.of(context).colorScheme.primary,
+                  tooltip: 'Изменить',
                 ),
               ),
               SizedBox(width: 8),
-              TextButton.icon(
-                onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
-                  final transactionProvider =
-                      context.read<TransactionProvider>();
-                  final accountProvider = context.read<AccountProvider>();
-                  final goalProvider = context.read<GoalProvider>();
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final transactionProvider =
+                        context.read<TransactionProvider>();
+                    final accountProvider = context.read<AccountProvider>();
+                    final goalProvider = context.read<GoalProvider>();
 
-                  try {
-                    await transactionProvider.removeTransaction(transaction.id);
-                    await accountProvider.update();
-                    await goalProvider.update();
+                    try {
+                      await transactionProvider.removeTransaction(transaction.id);
+                      await accountProvider.update();
+                      await goalProvider.update();
 
-                    messenger.showSnackBar(
-                      const SnackBar(content: Text('Операция удалена')),
-                    );
-                  } catch (e) {
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          e.toString().replaceAll('Exception: ', ''),
+                      messenger.showSnackBar(
+                        const SnackBar(content: Text('Операция удалена')),
+                      );
+                    } catch (e) {
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            e.toString().replaceAll('Exception: ', ''),
+                          ),
+                          backgroundColor: Colors.red,
                         ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                icon: Icon(Icons.delete, size: 18),
-                label: Text("Удалить"),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
+                      );
+                    }
+                  },
+                  icon: Icon(Icons.delete, size: 20),
+                  color: Colors.red,
+                  tooltip: 'Удалить',
                 ),
               ),
             ],
