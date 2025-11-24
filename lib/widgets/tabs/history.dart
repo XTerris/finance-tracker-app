@@ -29,7 +29,7 @@ class _HistoryTabState extends State<HistoryTab> {
     super.dispose();
   }
 
-  TransactionType _getTransactionType(Transaction transaction) {
+  TransactionType? _getTransactionType(Transaction transaction) {
     final hasFrom = transaction.fromAccountId != null;
     final hasTo = transaction.toAccountId != null;
 
@@ -37,9 +37,11 @@ class _HistoryTabState extends State<HistoryTab> {
       return TransactionType.transfer;
     } else if (hasFrom && !hasTo) {
       return TransactionType.expense;
-    } else {
+    } else if (!hasFrom && hasTo) {
       return TransactionType.income;
     }
+    // Return null for invalid transactions (neither account is set)
+    return null;
   }
 
   List<Transaction> _filterTransactions(List<Transaction> transactions) {
@@ -61,7 +63,8 @@ class _HistoryTabState extends State<HistoryTab> {
       // Type filter
       if (_selectedTypes.isNotEmpty) {
         final type = _getTransactionType(transaction);
-        if (!_selectedTypes.contains(type)) {
+        // Skip transactions with invalid type (no accounts set) or that don't match the filter
+        if (type == null || !_selectedTypes.contains(type)) {
           return false;
         }
       }
