@@ -57,7 +57,6 @@ class _EditAccountBottomSheetState extends State<EditAccountBottomSheet> {
         balance: double.parse(_balanceController.text.trim()),
       );
 
-      // Update goals after updating account
       await goalProvider.update();
 
       if (mounted) {
@@ -68,7 +67,7 @@ class _EditAccountBottomSheetState extends State<EditAccountBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        navigator.pop(); // Close bottom sheet first
+        navigator.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -101,7 +100,6 @@ class _EditAccountBottomSheetState extends State<EditAccountBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -119,7 +117,6 @@ class _EditAccountBottomSheetState extends State<EditAccountBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Name field
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -136,7 +133,6 @@ class _EditAccountBottomSheetState extends State<EditAccountBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Balance field
               TextFormField(
                 controller: _balanceController,
                 decoration: const InputDecoration(
@@ -161,7 +157,6 @@ class _EditAccountBottomSheetState extends State<EditAccountBottomSheet> {
               ),
               const SizedBox(height: 24),
 
-              // Submit button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(

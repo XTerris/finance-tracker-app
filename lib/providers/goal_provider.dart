@@ -7,7 +7,6 @@ class GoalProvider extends ChangeNotifier {
 
   List<Goal> get goals => _goals.values.toList();
 
-  /// Get goal by account ID instead of goal ID
   Goal? getGoalByAccountId(int accountId) {
     try {
       return _goals.values.firstWhere((goal) => goal.accountId == accountId);
@@ -16,20 +15,17 @@ class GoalProvider extends ChangeNotifier {
     }
   }
 
-  /// Get all goals for a specific account
   List<Goal> getGoalsByAccountId(int accountId) {
     return _goals.values.where((goal) => goal.accountId == accountId).toList();
   }
 
   Future<void> init() async {
-    // Initialize with data from database
     final goals = await serviceLocator.databaseService.getAllGoals();
     _goals = {for (var goal in goals) goal.id: goal};
     notifyListeners();
   }
 
   Future<void> update() async {
-    // Reload data from database
     await init();
   }
 

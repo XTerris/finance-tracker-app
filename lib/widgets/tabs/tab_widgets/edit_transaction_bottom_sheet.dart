@@ -85,7 +85,6 @@ class _EditTransactionBottomSheetState
 
         if (!mounted) return;
 
-        // Set the newly created category as selected
         if (categoryProvider.categories.isNotEmpty) {
           final newCategory = categoryProvider.categories.last;
           setState(() {
@@ -98,7 +97,7 @@ class _EditTransactionBottomSheetState
         );
       } catch (e) {
         if (!mounted) return;
-        navigator.pop(); // Close bottom sheet first
+        navigator.pop();
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -141,7 +140,6 @@ class _EditTransactionBottomSheetState
         amount: amount,
       );
 
-      // Update account balances and goals after updating transaction
       await accountProvider.update();
       await goalProvider.update();
 
@@ -153,7 +151,7 @@ class _EditTransactionBottomSheetState
       }
     } catch (e) {
       if (mounted) {
-        navigator.pop(); // Close bottom sheet first
+        navigator.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -208,7 +206,6 @@ class _EditTransactionBottomSheetState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -226,7 +223,6 @@ class _EditTransactionBottomSheetState
               ),
               const SizedBox(height: 16),
 
-              // Title field
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -243,7 +239,6 @@ class _EditTransactionBottomSheetState
               ),
               const SizedBox(height: 16),
 
-              // Amount field
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
@@ -268,7 +263,6 @@ class _EditTransactionBottomSheetState
               ),
               const SizedBox(height: 16),
 
-              // Category dropdown
               DropdownButtonFormField<int>(
                 value:
                     categoryProvider.categories.any(
@@ -317,7 +311,6 @@ class _EditTransactionBottomSheetState
               ),
               const SizedBox(height: 24),
 
-              // Submit button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(

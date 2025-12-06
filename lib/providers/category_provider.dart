@@ -8,14 +8,12 @@ class CategoryProvider extends ChangeNotifier {
   List<models.Category> get categories => _categories.values.toList();
 
   Future<void> init() async {
-    // Initialize with data from database
     final categories = await serviceLocator.databaseService.getAllCategories();
     _categories = {for (var category in categories) category.id: category};
     notifyListeners();
   }
 
   Future<void> update() async {
-    // Reload data from database
     await init();
   }
 

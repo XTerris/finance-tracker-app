@@ -42,30 +42,25 @@ class _HistoryTabState extends State<HistoryTab> {
     } else if (!hasFrom && hasTo) {
       return TransactionType.income;
     }
-    // Return null for invalid transactions (neither account is set)
     return null;
   }
 
   List<Transaction> _filterTransactions(List<Transaction> transactions) {
     return transactions.where((transaction) {
-      // Search filter
       if (_searchQuery.isNotEmpty) {
         if (!transaction.title.toLowerCase().contains(_searchQuery.toLowerCase())) {
           return false;
         }
       }
 
-      // Category filter
       if (_selectedCategories.isNotEmpty) {
         if (!_selectedCategories.contains(transaction.categoryId)) {
           return false;
         }
       }
 
-      // Type filter
       if (_selectedTypes.isNotEmpty) {
         final type = _getTransactionType(transaction);
-        // Skip transactions with invalid type (no accounts set) or that don't match the filter
         if (type == null || !_selectedTypes.contains(type)) {
           return false;
         }
@@ -108,7 +103,6 @@ class _HistoryTabState extends State<HistoryTab> {
         },
         child: Column(
           children: [
-            // Search and Filter section
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(
@@ -194,7 +188,6 @@ class _HistoryTabState extends State<HistoryTab> {
                 ],
               ),
             ),
-            // Transaction list
             Expanded(
               child: Builder(
                 builder: (context) {
@@ -341,7 +334,6 @@ class _FilterDialogState extends State<_FilterDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             Container(
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -374,7 +366,6 @@ class _FilterDialogState extends State<_FilterDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Transaction Types
                     Text(
                       'Тип операции',
                       style: TextStyle(
@@ -444,7 +435,6 @@ class _FilterDialogState extends State<_FilterDialog> {
 
                     SizedBox(height: 24),
 
-                    // Categories
                     Text(
                       'Категории',
                       style: TextStyle(
@@ -530,7 +520,6 @@ class _FilterDialogState extends State<_FilterDialog> {
               ),
             ),
 
-            // Action buttons
             Container(
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(

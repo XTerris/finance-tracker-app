@@ -48,12 +48,10 @@ class TransactionPlate extends StatelessWidget {
   }
 
   Widget _buildTransactionTypeIndicator() {
-    // Determine transaction type based on accounts
     final bool hasFrom = transaction.fromAccountId != null;
     final bool hasTo = transaction.toAccountId != null;
 
     if (hasFrom && hasTo) {
-      // Transfer between accounts
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -77,7 +75,6 @@ class TransactionPlate extends StatelessWidget {
         ),
       );
     } else if (hasFrom && !hasTo) {
-      // Expense
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -101,7 +98,6 @@ class TransactionPlate extends StatelessWidget {
         ),
       );
     } else if (!hasFrom && hasTo) {
-      // Income
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -147,7 +143,6 @@ class TransactionPlate extends StatelessWidget {
       }
       categoryName = _getCategoryName(categoryProvider, transaction.categoryId);
     } catch (e) {
-      // Silently handle errors - accounts or categories might have been deleted
     }
 
     final dateFormat = DateFormat('dd.MM.yyyy HH:mm');
@@ -170,7 +165,6 @@ class TransactionPlate extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row with title and type indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,12 +184,10 @@ class TransactionPlate extends StatelessWidget {
           ),
           SizedBox(height: 12),
 
-          // Amount and Category row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Amount with styled display
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
@@ -212,7 +204,6 @@ class TransactionPlate extends StatelessWidget {
                 ),
               ),
               
-              // Category on the right
               Flexible(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -236,7 +227,6 @@ class TransactionPlate extends StatelessWidget {
           ),
           SizedBox(height: 12),
 
-          // From Account (if exists)
           if (transaction.fromAccountId != null) ...[
             Row(
               children: [
@@ -264,7 +254,6 @@ class TransactionPlate extends StatelessWidget {
             SizedBox(height: 8),
           ],
 
-          // To Account (if exists)
           if (transaction.toAccountId != null) ...[
             Row(
               children: [
@@ -292,12 +281,10 @@ class TransactionPlate extends StatelessWidget {
             SizedBox(height: 8),
           ],
 
-          // Date and time and Action buttons row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Date and time on the left
               Row(
                 children: [
                   Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
@@ -312,7 +299,6 @@ class TransactionPlate extends StatelessWidget {
                 ],
               ),
               
-              // Action buttons on the right
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

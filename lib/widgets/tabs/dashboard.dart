@@ -7,7 +7,6 @@ import '../../providers/transaction_provider.dart';
 import '../../providers/account_provider.dart';
 import 'tab_widgets/transaction_plate.dart';
 
-/// Dashboard tab displaying financial statistics and recent transactions
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
 
@@ -15,7 +14,6 @@ class DashboardTab extends StatefulWidget {
   State<DashboardTab> createState() => _DashboardTabState();
 }
 
-/// Helper class to hold calculated dashboard statistics
 class _DashboardStats {
   final double currentMonthExpenses;
   final double currentMonthIncome;
@@ -39,7 +37,6 @@ class _DashboardStats {
 }
 
 class _DashboardTabState extends State<DashboardTab> {
-  // Calculate all dashboard statistics from transactions
   _DashboardStats _calculateDashboardStats(List<Transaction> transactions) {
     final now = DateTime.now();
     final currentMonthStart = DateTime(now.year, now.month, 1);
@@ -48,16 +45,12 @@ class _DashboardTabState extends State<DashboardTab> {
     double currentMonthIncome = 0.0;
 
     for (var transaction in transactions) {
-      // Current month expenses
-      // Use !isBefore to include transactions at exact start of month
       if (!transaction.doneAt.isBefore(currentMonthStart) &&
           transaction.fromAccountId != null &&
           transaction.toAccountId == null) {
         currentMonthExpenses += transaction.amount.abs();
       }
 
-      // Current month income
-      // Use !isBefore to include transactions at exact start of month
       if (!transaction.doneAt.isBefore(currentMonthStart) &&
           transaction.toAccountId != null &&
           transaction.fromAccountId == null) {
@@ -71,12 +64,10 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  // Calculate total balance across all accounts
   double _calculateTotalBalance(List<Account> accounts) {
     return accounts.fold(0.0, (sum, account) => sum + account.balance);
   }
 
-  // Get time-based greeting
   String _getGreeting() {
     final hour = DateTime.now().hour;
     
@@ -123,7 +114,6 @@ class _DashboardTabState extends State<DashboardTab> {
             ),
             SizedBox(height: 24),
 
-            // Total Balance Card
             Consumer<AccountProvider>(
               builder: (context, accountProvider, child) {
                 final totalBalance = _calculateTotalBalance(
@@ -170,14 +160,12 @@ class _DashboardTabState extends State<DashboardTab> {
 
             SizedBox(height: 16),
 
-            // Current Month Stats label
             Text(
               'В текущем месяце',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
 
-            // Current Month Stats
             Selector<TransactionProvider, _DashboardStats>(
               selector:
                   (context, transactionProvider) => _calculateDashboardStats(

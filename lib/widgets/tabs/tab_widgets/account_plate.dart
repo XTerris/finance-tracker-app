@@ -49,7 +49,6 @@ class AccountPlate extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       try {
         await context.read<AccountProvider>().removeAccount(account.id);
-        // Update goals after deleting account
         if (context.mounted) {
           await context.read<GoalProvider>().update();
         }
@@ -183,7 +182,6 @@ class AccountPlate extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Account name with icon
           Row(
             children: [
               Icon(Icons.account_balance_wallet, size: 20, color: Theme.of(context).colorScheme.primary),
@@ -198,7 +196,6 @@ class AccountPlate extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           
-          // Balance with styled display
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -215,13 +212,11 @@ class AccountPlate extends StatelessWidget {
             ),
           ),
 
-          // Goal information
           Consumer<GoalProvider>(
             builder: (context, goalProvider, child) {
               final goal = goalProvider.getGoalByAccountId(account.id);
 
               if (goal == null) {
-                // Show "Add Goal" button when no goal exists
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -278,7 +273,6 @@ class AccountPlate extends StatelessWidget {
                   const SizedBox(height: 12),
                   const Divider(),
                   const SizedBox(height: 12),
-                  // Goal header with status badge
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -333,7 +327,6 @@ class AccountPlate extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        // Target amount
                         Row(
                           children: [
                             Icon(Icons.savings, size: 16, color: Colors.grey[600]),
@@ -355,7 +348,6 @@ class AccountPlate extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        // Deadline
                         Row(
                           children: [
                             Icon(Icons.calendar_today, size: 16, color: daysLeft < 0 ? Colors.red : Colors.grey[600]),
@@ -378,7 +370,6 @@ class AccountPlate extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        // Progress bar
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -422,7 +413,6 @@ class AccountPlate extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        // Goal action buttons - icon only with colored backgrounds
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -499,7 +489,6 @@ class AccountPlate extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-          // Account action buttons - icon only with colored backgrounds
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

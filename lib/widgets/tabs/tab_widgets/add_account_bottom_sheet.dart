@@ -42,7 +42,6 @@ class _AddAccountBottomSheetState extends State<AddAccountBottomSheet> {
         double.parse(_balanceController.text.trim()),
       );
 
-      // Update goals after creating account (in case goals are linked to accounts)
       await goalProvider.update();
 
       if (mounted) {
@@ -53,7 +52,7 @@ class _AddAccountBottomSheetState extends State<AddAccountBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop(); // Close bottom sheet first
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -86,7 +85,6 @@ class _AddAccountBottomSheetState extends State<AddAccountBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -104,7 +102,6 @@ class _AddAccountBottomSheetState extends State<AddAccountBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Name field
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -121,7 +118,6 @@ class _AddAccountBottomSheetState extends State<AddAccountBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Balance field
               TextFormField(
                 controller: _balanceController,
                 decoration: const InputDecoration(
@@ -145,7 +141,6 @@ class _AddAccountBottomSheetState extends State<AddAccountBottomSheet> {
               ),
               const SizedBox(height: 24),
 
-              // Submit button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(

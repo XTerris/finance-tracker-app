@@ -30,7 +30,7 @@ class _AddGoalBottomSheetState extends State<AddGoalBottomSheet> {
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 3650)), // 10 years
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
     );
 
     if (picked != null) {
@@ -113,7 +113,6 @@ class _AddGoalBottomSheetState extends State<AddGoalBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -142,7 +141,6 @@ class _AddGoalBottomSheetState extends State<AddGoalBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Target Amount field
               TextFormField(
                 controller: _targetAmountController,
                 decoration: const InputDecoration(
@@ -170,7 +168,6 @@ class _AddGoalBottomSheetState extends State<AddGoalBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Deadline field
               InkWell(
                 onTap: _selectDate,
                 child: InputDecorator(
@@ -192,7 +189,6 @@ class _AddGoalBottomSheetState extends State<AddGoalBottomSheet> {
               ),
               const SizedBox(height: 24),
 
-              // Submit button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(

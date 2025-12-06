@@ -40,7 +40,7 @@ class _EditGoalBottomSheetState extends State<EditGoalBottomSheet> {
       context: context,
       initialDate: _selectedDeadline,
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 3650)), // ~10 years
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
     );
     if (picked != null && picked != _selectedDeadline) {
       setState(() {
@@ -77,7 +77,7 @@ class _EditGoalBottomSheetState extends State<EditGoalBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        navigator.pop(); // Close bottom sheet first
+        navigator.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -110,7 +110,6 @@ class _EditGoalBottomSheetState extends State<EditGoalBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -128,7 +127,6 @@ class _EditGoalBottomSheetState extends State<EditGoalBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Target Amount field
               TextFormField(
                 controller: _targetAmountController,
                 decoration: const InputDecoration(
@@ -156,7 +154,6 @@ class _EditGoalBottomSheetState extends State<EditGoalBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Deadline field
               OutlinedButton.icon(
                 onPressed: () => _selectDate(context),
                 icon: const Icon(Icons.calendar_today),
@@ -170,7 +167,6 @@ class _EditGoalBottomSheetState extends State<EditGoalBottomSheet> {
               ),
               const SizedBox(height: 24),
 
-              // Submit button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(

@@ -64,18 +64,14 @@ class _ReportsTabState extends State<ReportsTab> {
       final date = transaction.doneAt;
       if (date.isAfter(_startDate.subtract(const Duration(days: 1))) &&
           date.isBefore(_endDate.add(const Duration(days: 1)))) {
-        // Determine transaction type based on account IDs
         final hasFromAccount = transaction.fromAccountId != null;
         final hasToAccount = transaction.toAccountId != null;
 
         if (hasToAccount && !hasFromAccount) {
-          // Income: money coming into an account
           totalIncome += transaction.amount;
         } else if (hasFromAccount && !hasToAccount) {
-          // Expense: money leaving an account
           totalExpense += transaction.amount;
         }
-        // Transfers (both accounts set) are not counted in income/expense
       }
     }
 
@@ -156,7 +152,6 @@ class _ReportsTabState extends State<ReportsTab> {
                 ),
                 const SizedBox(height: 16),
 
-                // Period selection
                 GestureDetector(
                   onTap: _selectDateRange,
                   child: Container(
@@ -182,7 +177,6 @@ class _ReportsTabState extends State<ReportsTab> {
                 ),
                 const SizedBox(height: 16),
 
-                // Statistics card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -214,7 +208,6 @@ class _ReportsTabState extends State<ReportsTab> {
                 ),
                 const SizedBox(height: 16),
 
-                // Charts button
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
@@ -229,7 +222,6 @@ class _ReportsTabState extends State<ReportsTab> {
                 ),
                 const SizedBox(height: 16),
 
-                // Forecast button and card
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
@@ -244,7 +236,6 @@ class _ReportsTabState extends State<ReportsTab> {
                 ),
                 const SizedBox(height: 16),
 
-                // Export options
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -389,13 +380,11 @@ class _ReportsTabState extends State<ReportsTab> {
     );
   }
 
-  // Calculate optimal grouping period to keep bars between 5 and 14
   int _calculateOptimalGroupDays(int totalDays) {
     if (totalDays <= 14) {
-      return 1; // Daily grouping
+      return 1;
     }
 
-    // Try different grouping periods to find one that gives 5-14 bars
     for (int groupDays in [2, 3, 4, 5, 6, 7, 10, 14, 21, 28, 30]) {
       final numBars = (totalDays / groupDays).ceil();
       if (numBars >= 5 && numBars <= 14) {
@@ -403,8 +392,7 @@ class _ReportsTabState extends State<ReportsTab> {
       }
     }
 
-    // If no ideal grouping found, calculate custom period
-    return (totalDays / 10).ceil(); // Aim for ~10 bars
+    return (totalDays / 10).ceil();
   }
 
   Widget _buildChartView() {
@@ -413,7 +401,6 @@ class _ReportsTabState extends State<ReportsTab> {
         final transactions = transactionProvider.transactions;
         final categories = categoryProvider.categories;
 
-        // Filter transactions by date range
         final filteredTransactions =
             transactions.where((t) {
               return t.doneAt.isAfter(
@@ -422,13 +409,11 @@ class _ReportsTabState extends State<ReportsTab> {
                   t.doneAt.isBefore(_endDate.add(const Duration(days: 1)));
             }).toList();
 
-        // Prepare data based on chart type
         Map<String, double> chartData = {};
         Map<String, String> chartDataRanges =
-            {}; // Store period ranges for tooltips
+            {};
 
         if (_selectedChartType == ChartType.pie) {
-          // Calculate expenses by category for pie chart
           for (var transaction in filteredTransactions) {
             final hasFromAccount = transaction.fromAccountId != null;
             final hasToAccount = transaction.toAccountId != null;
@@ -452,8 +437,6 @@ class _ReportsTabState extends State<ReportsTab> {
             }
           }
         } else {
-          // Calculate expenses by periods for bar and line charts
-          // First, create a map with all days in the period (with 0 values)
           final Map<String, double> allDaysMap = {};
           DateTime currentDate = DateTime(
             _startDate.year,
@@ -469,7 +452,6 @@ class _ReportsTabState extends State<ReportsTab> {
             currentDate = currentDate.add(const Duration(days: 1));
           }
 
-          // Then, fill in actual transaction amounts
           for (var transaction in filteredTransactions) {
             final hasFromAccount = transaction.fromAccountId != null;
             final hasToAccount = transaction.toAccountId != null;
@@ -484,7 +466,6 @@ class _ReportsTabState extends State<ReportsTab> {
             }
           }
 
-          // Sort by date
           final sortedEntries =
               allDaysMap.entries.toList()..sort((a, b) {
                 final dateA = DateFormat('dd.MM.yyyy').parse(a.key);
@@ -492,14 +473,11 @@ class _ReportsTabState extends State<ReportsTab> {
                 return dateA.compareTo(dateB);
               });
 
-          // Calculate optimal grouping for better readability
           final totalDays = sortedEntries.length;
           final groupDays = _calculateOptimalGroupDays(totalDays);
 
           if (groupDays == 1) {
-            // Daily grouping - no need to group
             chartData = Map.fromEntries(sortedEntries);
-            // For daily data, range is just the single day
             for (var entry in sortedEntries) {
               final date = DateFormat('dd.MM.yyyy').parse(entry.key);
               chartDataRanges[entry.key] = DateFormat(
@@ -507,7 +485,6 @@ class _ReportsTabState extends State<ReportsTab> {
               ).format(date);
             }
           } else {
-            // Group by periods
             final Map<String, double> groupedData = {};
             final Map<String, DateTime> periodStarts = {};
             final Map<String, DateTime> periodEnds = {};
@@ -521,7 +498,6 @@ class _ReportsTabState extends State<ReportsTab> {
               final date = DateFormat('dd.MM.yyyy').parse(entry.key);
 
               if (periodStart == null || daysInCurrentPeriod >= groupDays) {
-                // Start a new period
                 periodStart = date;
                 periodKey = DateFormat('dd.MM').format(periodStart);
                 periodStarts[periodKey] = periodStart;
@@ -529,7 +505,6 @@ class _ReportsTabState extends State<ReportsTab> {
                 groupedData[periodKey] = 0.0;
               }
 
-              // Add to current period
               groupedData[periodKey!] = groupedData[periodKey]! + entry.value;
               periodEnds[periodKey] = date;
               daysInCurrentPeriod++;
@@ -537,7 +512,6 @@ class _ReportsTabState extends State<ReportsTab> {
 
             chartData = groupedData;
 
-            // Create range strings for tooltips
             periodStarts.forEach((key, start) {
               final end = periodEnds[key]!;
               if (start == end) {
@@ -595,17 +569,13 @@ class _ReportsTabState extends State<ReportsTab> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Chart visualization
                       if (chartData.isEmpty)
                         const Text('Нет данных для отображения')
                       else if (_selectedChartType == ChartType.line)
-                        // Line chart visualization for daily expenses
                         _buildLineChart(chartData, chartDataRanges)
                       else if (_selectedChartType == ChartType.bar)
-                        // Bar chart visualization for daily expenses
                         _buildBarChart(chartData, chartDataRanges)
                       else if (_selectedChartType == ChartType.pie)
-                        // Pie chart visualization for expenses by category
                         _buildPieChart(chartData)
                       else
                         const Text('Неизвестный тип диаграммы'),
@@ -655,7 +625,6 @@ class _ReportsTabState extends State<ReportsTab> {
       );
     }
 
-    // Parse dates and create spots for the line chart
     final List<FlSpot> spots = [];
     final List<String> labels = [];
     final List<double> amounts = [];
@@ -665,12 +634,10 @@ class _ReportsTabState extends State<ReportsTab> {
       amounts.add(amount);
     });
 
-    // Create spots with index as X and amount as Y
     for (int i = 0; i < labels.length; i++) {
       spots.add(FlSpot(i.toDouble(), amounts[i]));
     }
 
-    // Find min and max for better scaling
     final maxY = amounts.reduce((a, b) => a > b ? a : b);
     final minY = amounts.reduce((a, b) => a < b ? a : b);
 
@@ -715,12 +682,11 @@ class _ReportsTabState extends State<ReportsTab> {
                       if (index < 0 || index >= labels.length) {
                         return const Text('');
                       }
-                      // Show label (could be date or week)
                       final label = labels[index];
                       return Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Transform.rotate(
-                          angle: -0.5, // Rotate labels to prevent overlap
+                          angle: -0.5,
                           child: Text(
                             label,
                             style: const TextStyle(
@@ -812,7 +778,6 @@ class _ReportsTabState extends State<ReportsTab> {
           ),
         ),
         const SizedBox(height: 16),
-        // Show summary statistics
         Wrap(
           spacing: 16,
           runSpacing: 8,
@@ -850,7 +815,6 @@ class _ReportsTabState extends State<ReportsTab> {
       );
     }
 
-    // Parse labels and create bar groups
     final List<BarChartGroupData> barGroups = [];
     final List<String> labels = [];
     final List<double> amounts = [];
@@ -860,7 +824,6 @@ class _ReportsTabState extends State<ReportsTab> {
       amounts.add(amount);
     });
 
-    // Create bar groups with index as X
     for (int i = 0; i < labels.length; i++) {
       barGroups.add(
         BarChartGroupData(
@@ -880,7 +843,6 @@ class _ReportsTabState extends State<ReportsTab> {
       );
     }
 
-    // Find max for better scaling
     final maxY = amounts.reduce((a, b) => a > b ? a : b);
     final minY = amounts.reduce((a, b) => a < b ? a : b);
 
@@ -921,12 +883,11 @@ class _ReportsTabState extends State<ReportsTab> {
                       if (index < 0 || index >= labels.length) {
                         return const Text('');
                       }
-                      // Show label (could be date or week)
                       final label = labels[index];
                       return Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Transform.rotate(
-                          angle: -0.5, // Rotate labels to prevent overlap
+                          angle: -0.5,
                           child: Text(
                             label,
                             style: const TextStyle(
@@ -986,7 +947,6 @@ class _ReportsTabState extends State<ReportsTab> {
           ),
         ),
         const SizedBox(height: 16),
-        // Show summary statistics
         Wrap(
           spacing: 16,
           runSpacing: 8,
@@ -1014,10 +974,8 @@ class _ReportsTabState extends State<ReportsTab> {
       );
     }
 
-    // Calculate total for percentages
     final total = chartData.values.fold<double>(0, (sum, val) => sum + val);
 
-    // Create pie chart sections
     final List<PieChartSectionData> sections = [];
     final List<Color> colors = [
       Colors.blue,
@@ -1063,14 +1021,12 @@ class _ReportsTabState extends State<ReportsTab> {
               pieTouchData: PieTouchData(
                 enabled: true,
                 touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                  // Touch handling can be added here if needed
                 },
               ),
             ),
           ),
         ),
         const SizedBox(height: 24),
-        // Legend
         Wrap(
           spacing: 16,
           runSpacing: 12,
@@ -1139,7 +1095,6 @@ class _ReportsTabState extends State<ReportsTab> {
           (sum, account) => sum + account.balance,
         );
 
-        // Calculate average monthly expense
         final stats = _calculateStatistics(transactions);
         final daysDiff = _endDate.difference(_startDate).inDays;
         final monthsDiff = daysDiff / 30.0;

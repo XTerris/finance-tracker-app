@@ -1,4 +1,3 @@
-// Basic smoke test for the Finance Tracker App
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:finance_tracker_app/services/database_service.dart';
@@ -7,17 +6,14 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize FFI for desktop testing
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
 
   setUp(() async {
-    // Reset database before each test for isolation
     await DatabaseService.resetForTesting();
   });
 
   tearDown(() async {
-    // Clean up after each test
     await DatabaseService.resetForTesting();
   });
 
@@ -25,7 +21,6 @@ void main() {
     await DatabaseService.init();
     final dbService = DatabaseService();
 
-    // Verify database is initialized and accessible
     final categories = await dbService.getAllCategories();
     expect(categories, isA<List>());
   });
@@ -61,7 +56,6 @@ void main() {
     await DatabaseService.init();
     final dbService = DatabaseService();
 
-    // Create a category first
     final category = await dbService.createCategory('Test Category');
 
     final transaction = await dbService.createTransaction(

@@ -6,20 +6,17 @@ class TransactionProvider extends ChangeNotifier {
   List<Transaction> _transactions = [];
 
   List<Transaction> get transactions {
-    // Sort by date, newest first
     final sorted = List<Transaction>.from(_transactions);
     sorted.sort((a, b) => b.doneAt.compareTo(a.doneAt));
     return sorted;
   }
 
   Future<void> init() async {
-    // Initialize with data from database
     _transactions = await serviceLocator.databaseService.getAllTransactions();
     notifyListeners();
   }
 
   Future<void> update() async {
-    // Reload data from database
     await init();
   }
 
@@ -53,7 +50,6 @@ class TransactionProvider extends ChangeNotifier {
     final updatedTransaction = await serviceLocator.databaseService
         .updateTransaction(id: id, title: title, categoryId: categoryId, amount: amount);
 
-    // Update the local transaction list
     final index = _transactions.indexWhere((t) => t.id == id);
     if (index != -1) {
       _transactions[index] = updatedTransaction;
