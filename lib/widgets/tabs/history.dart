@@ -10,7 +10,8 @@ import 'tab_widgets/add_transaction_bottom_sheet.dart';
 
 enum TransactionType { income, expense, transfer }
 
-typedef FilterCallback = void Function(Set<int> categories, Set<TransactionType> types);
+typedef FilterCallback =
+    void Function(Set<int> categories, Set<TransactionType> types);
 
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
@@ -42,30 +43,27 @@ class _HistoryTabState extends State<HistoryTab> {
     } else if (!hasFrom && hasTo) {
       return TransactionType.income;
     }
-    // Return null for invalid transactions (neither account is set)
     return null;
   }
 
   List<Transaction> _filterTransactions(List<Transaction> transactions) {
     return transactions.where((transaction) {
-      // Search filter
       if (_searchQuery.isNotEmpty) {
-        if (!transaction.title.toLowerCase().contains(_searchQuery.toLowerCase())) {
+        if (!transaction.title.toLowerCase().contains(
+          _searchQuery.toLowerCase(),
+        )) {
           return false;
         }
       }
 
-      // Category filter
       if (_selectedCategories.isNotEmpty) {
         if (!_selectedCategories.contains(transaction.categoryId)) {
           return false;
         }
       }
 
-      // Type filter
       if (_selectedTypes.isNotEmpty) {
         final type = _getTransactionType(transaction);
-        // Skip transactions with invalid type (no accounts set) or that don't match the filter
         if (type == null || !_selectedTypes.contains(type)) {
           return false;
         }
@@ -78,16 +76,17 @@ class _HistoryTabState extends State<HistoryTab> {
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => _FilterDialog(
-        selectedCategories: _selectedCategories,
-        selectedTypes: _selectedTypes,
-        onApply: (categories, types) {
-          setState(() {
-            _selectedCategories = categories;
-            _selectedTypes = types;
-          });
-        },
-      ),
+      builder:
+          (context) => _FilterDialog(
+            selectedCategories: _selectedCategories,
+            selectedTypes: _selectedTypes,
+            onApply: (categories, types) {
+              setState(() {
+                _selectedCategories = categories;
+                _selectedTypes = types;
+              });
+            },
+          ),
     );
   }
 
@@ -108,7 +107,6 @@ class _HistoryTabState extends State<HistoryTab> {
         },
         child: Column(
           children: [
-            // Search and Filter section
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(
@@ -128,17 +126,18 @@ class _HistoryTabState extends State<HistoryTab> {
                           decoration: InputDecoration(
                             hintText: 'Поиск операций...',
                             prefixIcon: Icon(Icons.search),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? IconButton(
-                                    icon: Icon(Icons.clear),
-                                    onPressed: () {
-                                      setState(() {
-                                        _searchController.clear();
-                                        _searchQuery = '';
-                                      });
-                                    },
-                                  )
-                                : null,
+                            suffixIcon:
+                                _searchQuery.isNotEmpty
+                                    ? IconButton(
+                                      icon: Icon(Icons.clear),
+                                      onPressed: () {
+                                        setState(() {
+                                          _searchController.clear();
+                                          _searchQuery = '';
+                                        });
+                                      },
+                                    )
+                                    : null,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -155,12 +154,18 @@ class _HistoryTabState extends State<HistoryTab> {
                       SizedBox(width: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: (_selectedCategories.isNotEmpty || _selectedTypes.isNotEmpty)
-                              ? Theme.of(context).colorScheme.primaryContainer
-                              : Theme.of(context).colorScheme.surface,
+                          color:
+                              (_selectedCategories.isNotEmpty ||
+                                      _selectedTypes.isNotEmpty)
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer
+                                  : Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outline.withOpacity(0.3),
                           ),
                         ),
                         child: Stack(
@@ -169,11 +174,14 @@ class _HistoryTabState extends State<HistoryTab> {
                               icon: Icon(Icons.filter_list),
                               onPressed: _showFilterDialog,
                               tooltip: 'Фильтры',
-                              color: (_selectedCategories.isNotEmpty || _selectedTypes.isNotEmpty)
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
+                              color:
+                                  (_selectedCategories.isNotEmpty ||
+                                          _selectedTypes.isNotEmpty)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
                             ),
-                            if (_selectedCategories.isNotEmpty || _selectedTypes.isNotEmpty)
+                            if (_selectedCategories.isNotEmpty ||
+                                _selectedTypes.isNotEmpty)
                               Positioned(
                                 right: 8,
                                 top: 8,
@@ -181,7 +189,8 @@ class _HistoryTabState extends State<HistoryTab> {
                                   width: 8,
                                   height: 8,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -194,12 +203,14 @@ class _HistoryTabState extends State<HistoryTab> {
                 ],
               ),
             ),
-            // Transaction list
             Expanded(
               child: Builder(
                 builder: (context) {
-                  final allTransactions = context.watch<TransactionProvider>().transactions;
-                  final filteredTransactions = _filterTransactions(allTransactions);
+                  final allTransactions =
+                      context.watch<TransactionProvider>().transactions;
+                  final filteredTransactions = _filterTransactions(
+                    allTransactions,
+                  );
 
                   if (allTransactions.isEmpty) {
                     return Center(
@@ -220,11 +231,18 @@ class _HistoryTabState extends State<HistoryTab> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.search_off, size: 64, color: Colors.grey),
+                            Icon(
+                              Icons.search_off,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
                             SizedBox(height: 16),
                             Text(
                               'Ничего не найдено',
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -238,7 +256,9 @@ class _HistoryTabState extends State<HistoryTab> {
                     itemBuilder: (context, index) {
                       return Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: TransactionPlate(transaction: filteredTransactions[index]),
+                        child: TransactionPlate(
+                          transaction: filteredTransactions[index],
+                        ),
                       );
                     },
                   );
@@ -333,15 +353,14 @@ class _FilterDialogState extends State<_FilterDialog> {
     final categories = categoryProvider.categories;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             Container(
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -353,10 +372,7 @@ class _FilterDialogState extends State<_FilterDialog> {
                 children: [
                   Text(
                     'Фильтры',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: Icon(Icons.close),
@@ -374,7 +390,6 @@ class _FilterDialogState extends State<_FilterDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Transaction Types
                     Text(
                       'Тип операции',
                       style: TextStyle(
@@ -399,15 +414,20 @@ class _FilterDialogState extends State<_FilterDialog> {
                           },
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? _getTypeColor(type).withOpacity(0.1)
-                                  : Colors.transparent,
+                              color:
+                                  isSelected
+                                      ? _getTypeColor(type).withOpacity(0.1)
+                                      : Colors.transparent,
                               border: Border.all(
-                                color: isSelected
-                                    ? _getTypeColor(type)
-                                    : Colors.grey.withOpacity(0.3),
+                                color:
+                                    isSelected
+                                        ? _getTypeColor(type)
+                                        : Colors.grey.withOpacity(0.3),
                                 width: isSelected ? 2 : 1,
                               ),
                               borderRadius: BorderRadius.circular(12),
@@ -425,7 +445,10 @@ class _FilterDialogState extends State<_FilterDialog> {
                                     _getTypeName(type),
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                      fontWeight:
+                                          isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.normal,
                                     ),
                                   ),
                                 ),
@@ -444,7 +467,6 @@ class _FilterDialogState extends State<_FilterDialog> {
 
                     SizedBox(height: 24),
 
-                    // Categories
                     Text(
                       'Категории',
                       style: TextStyle(
@@ -458,15 +480,14 @@ class _FilterDialogState extends State<_FilterDialog> {
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
                           'Нет доступных категорий',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       )
                     else
                       ...categories.map((category) {
-                        final isSelected = _tempCategories.contains(category.id);
+                        final isSelected = _tempCategories.contains(
+                          category.id,
+                        );
                         return Padding(
                           padding: EdgeInsets.only(bottom: 8),
                           child: InkWell(
@@ -481,15 +502,24 @@ class _FilterDialogState extends State<_FilterDialog> {
                             },
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primaryContainer
-                                    : Colors.transparent,
+                                color:
+                                    isSelected
+                                        ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                        : Colors.transparent,
                                 border: Border.all(
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Colors.grey.withOpacity(0.3),
+                                  color:
+                                      isSelected
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.primary
+                                          : Colors.grey.withOpacity(0.3),
                                   width: isSelected ? 2 : 1,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -498,9 +528,12 @@ class _FilterDialogState extends State<_FilterDialog> {
                                 children: [
                                   Icon(
                                     Icons.category,
-                                    color: isSelected
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Colors.grey,
+                                    color:
+                                        isSelected
+                                            ? Theme.of(
+                                              context,
+                                            ).colorScheme.primary
+                                            : Colors.grey,
                                     size: 20,
                                   ),
                                   SizedBox(width: 12),
@@ -509,14 +542,18 @@ class _FilterDialogState extends State<_FilterDialog> {
                                       category.name,
                                       style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                        fontWeight:
+                                            isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
                                       ),
                                     ),
                                   ),
                                   if (isSelected)
                                     Icon(
                                       Icons.check_circle,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                       size: 20,
                                     ),
                                 ],
@@ -530,12 +567,13 @@ class _FilterDialogState extends State<_FilterDialog> {
               ),
             ),
 
-            // Action buttons
             Container(
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),

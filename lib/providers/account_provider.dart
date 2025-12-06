@@ -6,21 +6,18 @@ class AccountProvider extends ChangeNotifier {
   Map<int, Account> _accounts = {};
 
   List<Account> get accounts {
-    // Sort alphabetically by name
     final sorted = _accounts.values.toList();
     sorted.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     return sorted;
   }
 
   Future<void> init() async {
-    // Initialize with data from database
     final accounts = await serviceLocator.databaseService.getAllAccounts();
     _accounts = {for (var account in accounts) account.id: account};
     notifyListeners();
   }
 
   Future<void> update() async {
-    // Reload data from database
     await init();
   }
 

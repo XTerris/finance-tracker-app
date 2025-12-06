@@ -16,7 +16,7 @@ class TransactionPlate extends StatelessWidget {
 
   String _getAccountName(AccountProvider accountProvider, int? accountId) {
     if (accountId == null) return '—';
-    
+
     try {
       final account = accountProvider.accounts.firstWhere(
         (acc) => acc.id == accountId,
@@ -48,12 +48,10 @@ class TransactionPlate extends StatelessWidget {
   }
 
   Widget _buildTransactionTypeIndicator() {
-    // Determine transaction type based on accounts
     final bool hasFrom = transaction.fromAccountId != null;
     final bool hasTo = transaction.toAccountId != null;
 
     if (hasFrom && hasTo) {
-      // Transfer between accounts
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -77,7 +75,6 @@ class TransactionPlate extends StatelessWidget {
         ),
       );
     } else if (hasFrom && !hasTo) {
-      // Expense
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -101,7 +98,6 @@ class TransactionPlate extends StatelessWidget {
         ),
       );
     } else if (!hasFrom && hasTo) {
-      // Income
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -140,15 +136,19 @@ class TransactionPlate extends StatelessWidget {
 
     try {
       if (transaction.fromAccountId != null) {
-        fromAccountName = _getAccountName(accountProvider, transaction.fromAccountId);
+        fromAccountName = _getAccountName(
+          accountProvider,
+          transaction.fromAccountId,
+        );
       }
       if (transaction.toAccountId != null) {
-        toAccountName = _getAccountName(accountProvider, transaction.toAccountId);
+        toAccountName = _getAccountName(
+          accountProvider,
+          transaction.toAccountId,
+        );
       }
       categoryName = _getCategoryName(categoryProvider, transaction.categoryId);
-    } catch (e) {
-      // Silently handle errors - accounts or categories might have been deleted
-    }
+    } catch (e) {}
 
     final dateFormat = DateFormat('dd.MM.yyyy HH:mm');
 
@@ -170,7 +170,6 @@ class TransactionPlate extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row with title and type indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,10 +177,7 @@ class TransactionPlate extends StatelessWidget {
               Expanded(
                 child: Text(
                   transaction.title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               SizedBox(width: 8),
@@ -190,12 +186,10 @@ class TransactionPlate extends StatelessWidget {
           ),
           SizedBox(height: 12),
 
-          // Amount and Category row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Amount with styled display
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
@@ -211,8 +205,7 @@ class TransactionPlate extends StatelessWidget {
                   ),
                 ),
               ),
-              
-              // Category on the right
+
               Flexible(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -236,7 +229,6 @@ class TransactionPlate extends StatelessWidget {
           ),
           SizedBox(height: 12),
 
-          // From Account (if exists)
           if (transaction.fromAccountId != null) ...[
             Row(
               children: [
@@ -244,18 +236,12 @@ class TransactionPlate extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Счет списания: ',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 Flexible(
                   child: Text(
                     fromAccountName,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -264,7 +250,6 @@ class TransactionPlate extends StatelessWidget {
             SizedBox(height: 8),
           ],
 
-          // To Account (if exists)
           if (transaction.toAccountId != null) ...[
             Row(
               children: [
@@ -272,18 +257,12 @@ class TransactionPlate extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Счет зачисления: ',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 Flexible(
                   child: Text(
                     toAccountName,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -292,27 +271,21 @@ class TransactionPlate extends StatelessWidget {
             SizedBox(height: 8),
           ],
 
-          // Date and time and Action buttons row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Date and time on the left
               Row(
                 children: [
                   Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
                   SizedBox(width: 8),
                   Text(
                     dateFormat.format(transaction.doneAt),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                   ),
                 ],
               ),
-              
-              // Action buttons on the right
+
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -357,7 +330,9 @@ class TransactionPlate extends StatelessWidget {
                         final goalProvider = context.read<GoalProvider>();
 
                         try {
-                          await transactionProvider.removeTransaction(transaction.id);
+                          await transactionProvider.removeTransaction(
+                            transaction.id,
+                          );
                           await accountProvider.update();
                           await goalProvider.update();
 

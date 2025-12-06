@@ -110,7 +110,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
 
         if (!mounted) return;
 
-        // Set the newly created category as selected
         if (categoryProvider.categories.isNotEmpty) {
           final newCategory = categoryProvider.categories.last;
           setState(() {
@@ -123,7 +122,7 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
         );
       } catch (e) {
         if (!mounted) return;
-        navigator.pop(); // Close bottom sheet first
+        navigator.pop();
         scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -146,7 +145,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
       return;
     }
 
-    // Validate accounts based on transaction type
     if (_transactionType == TransactionType.expense ||
         _transactionType == TransactionType.transfer) {
       if (_selectedFromAccountId == null) {
@@ -182,7 +180,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
         doneAt: _selectedDate,
       );
 
-      // Update account balances and goals after creating transaction
       await accountProvider.update();
       await goalProvider.update();
 
@@ -194,7 +191,7 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        navigator.pop(); // Close bottom sheet first
+        navigator.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -250,7 +247,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -268,7 +264,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Title field
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -285,7 +280,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Amount field
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
@@ -309,7 +303,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Category dropdown
               DropdownButtonFormField<int>(
                 value: _selectedCategoryId,
                 decoration: const InputDecoration(
@@ -353,7 +346,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Transaction Type
               DropdownButtonFormField<TransactionType>(
                 value: _transactionType,
                 decoration: const InputDecoration(
@@ -406,7 +398,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               const SizedBox(height: 16),
 
               if (_transactionType != TransactionType.income) ...[
-                // From Account dropdown
                 DropdownButtonFormField<int>(
                   value: _selectedFromAccountId,
                   decoration: const InputDecoration(
@@ -447,7 +438,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               ],
 
               if (_transactionType != TransactionType.expense) ...[
-                // To Account dropdown
                 DropdownButtonFormField<int>(
                   value: _selectedToAccountId,
                   decoration: const InputDecoration(
@@ -487,7 +477,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
                 const SizedBox(height: 16),
               ],
 
-              // Date and Time
               Row(
                 children: [
                   Expanded(
@@ -511,7 +500,6 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               ),
               const SizedBox(height: 24),
 
-              // Submit button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
