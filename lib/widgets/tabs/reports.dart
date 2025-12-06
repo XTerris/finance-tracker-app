@@ -126,6 +126,11 @@ class _ReportsTabState extends State<ReportsTab> {
 
   void _exportChartImage() async {
     try {
+      // Validate that a chart type is selected
+      if (_selectedChartType == ChartType.none) {
+        throw Exception('Сначала выберите тип диаграммы');
+      }
+
       // Find the RenderRepaintBoundary
       RenderRepaintBoundary? boundary = _chartKey.currentContext
           ?.findRenderObject() as RenderRepaintBoundary?;
