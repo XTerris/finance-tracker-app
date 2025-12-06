@@ -150,8 +150,9 @@ class _ReportsTabState extends State<ReportsTab> {
       var status = await Permission.storage.status;
       if (!status.isGranted) {
         // For Android 13+ (API 33+), use photos permission
-        if (await Permission.photos.isGranted || 
-            await Permission.photos.request().isGranted) {
+        if (await Permission.photos.isGranted) {
+          status = PermissionStatus.granted;
+        } else if (await Permission.photos.request().isGranted) {
           status = PermissionStatus.granted;
         } else if (await Permission.storage.request().isGranted) {
           status = PermissionStatus.granted;
