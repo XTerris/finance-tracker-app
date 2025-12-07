@@ -1,11 +1,12 @@
+// Модель финансовой транзакции (расход, доход или перевод)
 class Transaction {
   final int id;
-  final String title;
-  final double amount;
-  final DateTime doneAt;
-  final int categoryId;
-  final int? fromAccountId;
-  final int? toAccountId;
+  final String title; // Описание транзакции
+  final double amount; // Сумма транзакции
+  final DateTime doneAt; // Дата и время совершения
+  final int categoryId; // Категория транзакции
+  final int? fromAccountId; // Счет списания (для расходов и переводов)
+  final int? toAccountId; // Счет зачисления (для доходов и переводов)
 
   Transaction({
     required this.id,
@@ -17,6 +18,7 @@ class Transaction {
     this.toAccountId,
   });
 
+  // Создание объекта из JSON (из базы данных)
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       id: json['id'],
@@ -29,6 +31,7 @@ class Transaction {
     );
   }
 
+  // Преобразование объекта в JSON (для сохранения в БД)
   Map<String, dynamic> toJson() {
     return {
       'id': id,

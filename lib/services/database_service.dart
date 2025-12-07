@@ -6,11 +6,13 @@ import '../models/category.dart';
 import '../models/account.dart';
 import '../models/goal.dart';
 
+// Сервис для работы с локальной SQLite базой данных
 class DatabaseService {
   static Database? _database;
   static const String _databaseName = 'finance_tracker.db';
   static const int _databaseVersion = 1;
 
+  // Названия таблиц в базе данных
   static const String _categoryTable = 'categories';
   static const String _accountTable = 'accounts';
   static const String _transactionTable = 'transactions';
@@ -22,9 +24,11 @@ class DatabaseService {
 
   static final DatabaseService _instance = DatabaseService._internal();
 
+  // Инициализация базы данных при запуске приложения
   static Future<void> init() async {
     if (_database != null) return;
 
+    // Для desktop платформ используем FFI версию SQLite
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
@@ -40,6 +44,7 @@ class DatabaseService {
     );
   }
 
+  // Создание структуры таблиц при первом запуске
   static Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE $_categoryTable (
@@ -90,6 +95,8 @@ class DatabaseService {
     return _database!;
   }
 
+  // === Методы для работы с категориями ===
+
   Future<List<Category>> getAllCategories() async {
     final List<Map<String, dynamic>> maps = await _db.query(_categoryTable);
     return List.generate(maps.length, (i) {
@@ -107,6 +114,8 @@ class DatabaseService {
   Future<void> deleteCategory(int id) async {
     await _db.delete(_categoryTable, where: 'id = ?', whereArgs: [id]);
   }
+
+  // === Методы для работы со счетами ===
 
   Future<List<Account>> getAllAccounts() async {
     final List<Map<String, dynamic>> maps = await _db.query(_accountTable);
@@ -169,6 +178,7 @@ class DatabaseService {
   }
 
   Future<void> deleteAccount(int id) async {
+    // Проверка на наличие связанных транзакций
     final transactions = await _db.query(
       _transactionTable,
       where: 'from_account_id = ? OR to_account_id = ?',
@@ -185,6 +195,8 @@ class DatabaseService {
 
     await _db.delete(_accountTable, where: 'id = ?', whereArgs: [id]);
   }
+
+  // === Методы для работы с транзакциями ===
 
   Future<List<models.Transaction>> getAllTransactions() async {
     final List<Map<String, dynamic>> maps = await _db.query(_transactionTable);
@@ -223,6 +235,7 @@ class DatabaseService {
     );
   }
 
+  // Создание транзакции с автоматическим обновлением балансов счетов
   Future<models.Transaction> createTransaction({
     required String title,
     required double amount,
@@ -244,6 +257,7 @@ class DatabaseService {
         'to_account_id': toAccountId,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
+      // Обновление балансов связанных счетов
       if (fromAccountId != null) {
         await _updateAccountBalance(txn, fromAccountId, -amount);
       }
@@ -251,6 +265,7 @@ class DatabaseService {
         await _updateAccountBalance(txn, toAccountId, amount);
       }
 
+      // Проверка на отрицательный баланс в истории счетов
       final accountsToValidate = <int>{};
       if (fromAccountId != null) accountsToValidate.add(fromAccountId);
       if (toAccountId != null) accountsToValidate.add(toAccountId);
@@ -283,6 +298,7 @@ class DatabaseService {
     });
   }
 
+  // Обновление транзакции с пересчетом балансов
   Future<models.Transaction> updateTransaction({
     required int id,
     String? title,
@@ -308,6 +324,7 @@ class DatabaseService {
       final fromAccountId = currentTxn['from_account_id'] as int?;
       final toAccountId = currentTxn['to_account_id'] as int?;
 
+      // Если сумма изменилась, откатываем и применяем новую
       if (amount != null && amount != oldAmount) {
         if (fromAccountId != null) {
           await _updateAccountBalance(txn, fromAccountId, oldAmount);
@@ -368,6 +385,7 @@ class DatabaseService {
     });
   }
 
+  // Удаление транзакции с откатом изменений балансов
   Future<void> deleteTransaction(int id) async {
     await _db.transaction((txn) async {
       final txnQuery = await txn.query(
@@ -387,6 +405,7 @@ class DatabaseService {
 
       await txn.delete(_transactionTable, where: 'id = ?', whereArgs: [id]);
 
+      // Откат изменений балансов
       if (fromAccountId != null) {
         await _updateAccountBalance(txn, fromAccountId, amount);
       }
@@ -410,6 +429,7 @@ class DatabaseService {
     });
   }
 
+  // Обновление баланса счета на указанную величину
   Future<void> _updateAccountBalance(
     DatabaseExecutor txn,
     int accountId,
@@ -439,6 +459,7 @@ class DatabaseService {
         : 'Unknown Account';
   }
 
+  // Проверка, что баланс счета не уходил в минус на протяжении всей истории
   Future<bool> _validateAccountBalanceHistory(
     DatabaseExecutor txn,
     int accountId,
@@ -462,6 +483,7 @@ class DatabaseService {
       orderBy: 'done_at ASC',
     );
 
+    // Вычисление начального баланса (до всех транзакций)
     double runningBalance = currentBalance;
 
     for (final txn in transactions.reversed) {
@@ -483,6 +505,7 @@ class DatabaseService {
       return false;
     }
 
+    // Проверка баланса после каждой транзакции
     for (final txn in transactions) {
       final amount = txn['amount'] as double;
       final fromAccountId = txn['from_account_id'] as int?;
@@ -502,6 +525,8 @@ class DatabaseService {
 
     return true;
   }
+
+  // === Методы для работы с целями ===
 
   Future<List<Goal>> getAllGoals() async {
     final List<Map<String, dynamic>> maps = await _db.query(_goalTable);
@@ -591,6 +616,7 @@ class DatabaseService {
     _database = null;
   }
 
+  // Сброс базы данных для тестирования
   static Future<void> resetForTesting() async {
     if (_database != null) {
       await _database!.close();
