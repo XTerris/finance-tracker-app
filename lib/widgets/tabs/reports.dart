@@ -141,15 +141,12 @@ class _ReportsTabState extends State<ReportsTab> {
 
   Future<String?> _getSaveDirectory() async {
     if (kIsWeb) {
-      // Web platform - use browser download
       return null;
     }
 
     if (Platform.isAndroid) {
-      // Request storage permission on Android
       var status = await Permission.storage.status;
       if (!status.isGranted) {
-        // For Android 13+ (API 33+), use photos permission
         if (await Permission.photos.isGranted) {
           status = PermissionStatus.granted;
         } else if (await Permission.photos.request().isGranted) {
@@ -163,22 +160,17 @@ class _ReportsTabState extends State<ReportsTab> {
         throw Exception('Требуется разрешение на сохранение файлов');
       }
 
-      // Get external storage directory for Android
       final directory = await getExternalStorageDirectory();
       if (directory == null) {
         throw Exception('Не удалось получить доступ к хранилищу');
       }
 
-      // Navigate to Pictures/Finance Tracker/
-      // Android external storage path: /storage/emulated/0/Android/data/package/files
-      // We need to go up and then to Pictures
       final parts = directory.path.split('/');
       final storageIndex = parts.indexOf('Android');
       if (storageIndex > 0) {
         final basePath = parts.sublist(0, storageIndex).join('/');
         final picturesPath = '$basePath/Pictures/Finance Tracker';
         
-        // Create the directory if it doesn't exist
         final picturesDir = Directory(picturesPath);
         if (!await picturesDir.exists()) {
           await picturesDir.create(recursive: true);
@@ -187,14 +179,11 @@ class _ReportsTabState extends State<ReportsTab> {
         return picturesPath;
       }
       
-      // Fallback to external storage directory
       return directory.path;
     } else if (Platform.isIOS) {
-      // iOS - use app documents directory
       final directory = await getApplicationDocumentsDirectory();
       return directory.path;
     } else {
-      // Other platforms (desktop)
       final directory = await getApplicationDocumentsDirectory();
       return directory.path;
     }
@@ -202,55 +191,45 @@ class _ReportsTabState extends State<ReportsTab> {
 
   void _exportChartImage() async {
     try {
-      // Validate that a chart type is selected
       if (_selectedChartType == ChartType.none) {
         throw Exception('Сначала выберите тип диаграммы');
       }
 
-      // Find the RenderRepaintBoundary
       final renderObject = _chartKey.currentContext?.findRenderObject();
       if (renderObject is! RenderRepaintBoundary) {
         throw Exception('Не удалось найти диаграмму для экспорта');
       }
 
-      // Capture the image with a higher pixel ratio for better quality
       ui.Image image = await renderObject.toImage(pixelRatio: 3.0);
       
-      // Convert to byte data
       var byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) {
         throw Exception('Не удалось преобразовать изображение');
       }
 
-      // Convert PNG to JPEG
       var pngBytes = byteData.buffer.asUint8List();
       var decodedImage = img.decodeImage(pngBytes);
       if (decodedImage == null) {
         throw Exception('Не удалось декодировать изображение');
       }
 
-      // Encode as JPEG with quality 90
       var jpegBytes = img.encodeJpg(decodedImage, quality: 90);
 
-      // Get directory to save the file
       final directoryPath = await _getSaveDirectory();
       if (directoryPath == null) {
         throw Exception('Не удалось определить путь для сохранения');
       }
       
-      // Create filename with timestamp
       final timestamp = DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
       final chartTypeName = _getChartTypeName();
       final fileName = 'chart_${chartTypeName}_$timestamp.jpg';
       final filePath = '$directoryPath/$fileName';
 
-      // Save the file
       final file = File(filePath);
       await file.writeAsBytes(jpegBytes);
 
       if (!mounted) return;
       
-      // Show success message with location hint
       final locationHint = Platform.isAndroid 
           ? 'Pictures/Finance Tracker/$fileName'
           : fileName;
