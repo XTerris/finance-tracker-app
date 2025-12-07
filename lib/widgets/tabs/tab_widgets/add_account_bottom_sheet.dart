@@ -4,6 +4,7 @@ import '../../../providers/account_provider.dart';
 import '../../../providers/goal_provider.dart';
 import 'add_bottom_sheet_base.dart';
 
+// Форма для добавления нового счета
 class AddAccountBottomSheet extends AddBottomSheetBase {
   const AddAccountBottomSheet({super.key});
 
@@ -29,6 +30,7 @@ class _AddAccountBottomSheetState
   @override
   String get submitButtonText => 'Создать счёт';
 
+  // Создание нового счета с начальным балансом
   @override
   Future<void> submitForm() async {
     try {

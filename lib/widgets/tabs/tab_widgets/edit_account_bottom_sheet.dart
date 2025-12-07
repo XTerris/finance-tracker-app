@@ -5,6 +5,7 @@ import '../../../providers/account_provider.dart';
 import '../../../providers/goal_provider.dart';
 import 'add_bottom_sheet_base.dart';
 
+// Форма для редактирования существующего счета
 class EditAccountBottomSheet extends AddBottomSheetBase {
   final Account account;
 
@@ -22,6 +23,7 @@ class _EditAccountBottomSheetState
   @override
   void initState() {
     super.initState();
+    // Заполнение полей текущими значениями счета
     _nameController = TextEditingController(text: widget.account.name);
     _balanceController = TextEditingController(
       text: widget.account.balance.toStringAsFixed(2),
@@ -41,6 +43,7 @@ class _EditAccountBottomSheetState
   @override
   String get submitButtonText => 'Сохранить изменения';
 
+  // Сохранение изменений счета
   @override
   Future<void> submitForm() async {
     final navigator = Navigator.of(context);
