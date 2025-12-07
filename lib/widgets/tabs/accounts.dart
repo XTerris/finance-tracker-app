@@ -5,8 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'tab_widgets/account_plate.dart';
 import 'tab_widgets/add_account_bottom_sheet.dart';
+import 'tab_base.dart';
 
-class AccountsAndGoalsTab extends StatefulWidget {
+class AccountsAndGoalsTab extends TabBase {
   const AccountsAndGoalsTab({super.key});
 
   @override
