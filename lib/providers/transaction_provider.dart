@@ -2,24 +2,29 @@ import 'package:flutter/foundation.dart';
 import '../models/transaction.dart';
 import '../service_locator.dart';
 
+// Провайдер для управления состоянием транзакций
 class TransactionProvider extends ChangeNotifier {
   List<Transaction> _transactions = [];
 
+  // Получение списка транзакций, отсортированных по дате (новые первыми)
   List<Transaction> get transactions {
     final sorted = List<Transaction>.from(_transactions);
     sorted.sort((a, b) => b.doneAt.compareTo(a.doneAt));
     return sorted;
   }
 
+  // Загрузка всех транзакций из базы данных
   Future<void> init() async {
     _transactions = await serviceLocator.databaseService.getAllTransactions();
     notifyListeners();
   }
 
+  // Обновление списка транзакций из БД
   Future<void> update() async {
     await init();
   }
 
+  // Создание новой транзакции
   Future<void> addTransaction({
     required String title,
     required double amount,
@@ -41,6 +46,7 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Обновление существующей транзакции
   Future<void> updateTransaction({
     required int id,
     String? title,
@@ -62,6 +68,7 @@ class TransactionProvider extends ChangeNotifier {
     }
   }
 
+  // Удаление транзакции
   Future<void> removeTransaction(int id) async {
     await serviceLocator.databaseService.deleteTransaction(id);
     _transactions.removeWhere((transaction) => transaction.id == id);

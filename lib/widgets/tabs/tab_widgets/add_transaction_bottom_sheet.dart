@@ -7,8 +7,10 @@ import '../../../providers/account_provider.dart';
 import '../../../providers/goal_provider.dart';
 import 'add_bottom_sheet_base.dart';
 
+// Типы транзакций для выбора в форме
 enum TransactionType { expense, income, transfer }
 
+// Форма для добавления новой транзакции
 class AddTransactionBottomSheet extends AddBottomSheetBase {
   const AddTransactionBottomSheet({super.key});
 
@@ -24,8 +26,8 @@ class _AddTransactionBottomSheetState
 
   int? _selectedCategoryId;
   TransactionType _transactionType = TransactionType.expense;
-  int? _selectedFromAccountId;
-  int? _selectedToAccountId;
+  int? _selectedFromAccountId; // Счет списания
+  int? _selectedToAccountId; // Счет зачисления
   DateTime _selectedDate = DateTime.now();
 
   @override
@@ -35,6 +37,7 @@ class _AddTransactionBottomSheetState
     super.dispose();
   }
 
+  // Выбор даты транзакции
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -49,6 +52,7 @@ class _AddTransactionBottomSheetState
     }
   }
 
+  // Выбор времени транзакции
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -67,6 +71,7 @@ class _AddTransactionBottomSheetState
     }
   }
 
+  // Создание новой категории через диалог
   Future<void> _createNewCategory(BuildContext context) async {
     final categoryNameController = TextEditingController();
     final categoryProvider = context.read<CategoryProvider>();
@@ -141,6 +146,7 @@ class _AddTransactionBottomSheetState
   @override
   String get submitButtonText => 'Добавить операцию';
 
+  // Валидация и отправка формы создания транзакции
   @override
   Future<void> submitForm() async {
     if (_selectedCategoryId == null) {
@@ -148,6 +154,7 @@ class _AddTransactionBottomSheetState
       return;
     }
 
+    // Проверка выбора счетов в зависимости от типа транзакции
     if (_transactionType == TransactionType.expense ||
         _transactionType == TransactionType.transfer) {
       if (_selectedFromAccountId == null) {
@@ -170,6 +177,7 @@ class _AddTransactionBottomSheetState
       final accountProvider = context.read<AccountProvider>();
       final goalProvider = context.read<GoalProvider>();
 
+      // Создание транзакции и обновление связанных данных
       await transactionProvider.addTransaction(
         title: _titleController.text.trim(),
         amount: double.parse(_amountController.text.trim()),
@@ -201,6 +209,7 @@ class _AddTransactionBottomSheetState
     }
   }
 
+  // Построение содержимого формы
   @override
   Widget buildFormContent(BuildContext context) {
     final categoryProvider = context.watch<CategoryProvider>();

@@ -1,9 +1,10 @@
+// Модель финансовой цели (накопление определенной суммы на счете)
 class Goal {
   final int id;
-  final int accountId;
-  final double targetAmount;
-  final DateTime deadline;
-  bool isCompleted;
+  final int accountId; // Счет, к которому привязана цель
+  final double targetAmount; // Целевая сумма для достижения
+  final DateTime deadline; // Срок достижения цели
+  bool isCompleted; // Флаг завершенности цели
 
   Goal({
     required this.id,
@@ -13,6 +14,7 @@ class Goal {
     required this.isCompleted,
   });
 
+  // Создание объекта из JSON (из базы данных)
   factory Goal.fromJson(Map<String, dynamic> json) {
     return Goal(
       id: json['id'],
@@ -23,6 +25,7 @@ class Goal {
     );
   }
 
+  // Преобразование объекта в JSON (для сохранения в БД)
   Map<String, dynamic> toJson() {
     return {
       'id': id,

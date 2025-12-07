@@ -4,6 +4,7 @@ import '../../../providers/goal_provider.dart';
 import '../../../models/account.dart';
 import 'add_bottom_sheet_base.dart';
 
+// Форма для создания новой финансовой цели для счета
 class AddGoalBottomSheet extends AddBottomSheetBase {
   final Account account;
 
@@ -24,6 +25,7 @@ class _AddGoalBottomSheetState
     super.dispose();
   }
 
+  // Выбор срока достижения цели
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,

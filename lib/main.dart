@@ -11,9 +11,11 @@ import 'widgets/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Инициализация сервисов приложения (в том числе базы данных)
   await ServiceLocator.init();
 
   runApp(
+    // Настройка провайдеров для управления состоянием приложения
     MultiProvider(
       providers: [
         ChangeNotifierProvider<TransactionProvider>(
@@ -44,6 +46,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
+      // Поддержка русской и английской локализации
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
