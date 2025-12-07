@@ -25,7 +25,7 @@ class TransactionPlate extends PlateBase {
       );
       return account.name;
     } catch (e) {
-      // Ignore errors when fetching account or category names
+      // Игнорируем ошибки при получении названий
       return '—';
     }
   }
