@@ -120,6 +120,9 @@ class DatabaseService {
   }
 
   Future<Account> createAccount(String name, double initialBalance) async {
+    if (initialBalance < 0) {
+      throw Exception('Начальный баланс не может быть отрицательным');
+    }
     final id = await _db.insert(_accountTable, {
       'name': name,
       'balance': initialBalance,
@@ -140,6 +143,10 @@ class DatabaseService {
 
     if (current.isEmpty) {
       throw Exception('Account not found');
+    }
+
+    if (balance != null && balance < 0) {
+      throw Exception('Баланс счёта не может быть отрицательным');
     }
 
     final Map<String, dynamic> updates = {};
@@ -224,6 +231,9 @@ class DatabaseService {
     int? fromAccountId,
     int? toAccountId,
   }) async {
+    if (amount <= 0) {
+      throw Exception('Сумма операции должна быть больше нуля');
+    }
     return await _db.transaction((txn) async {
       final id = await txn.insert(_transactionTable, {
         'title': title,
@@ -279,6 +289,9 @@ class DatabaseService {
     int? categoryId,
     double? amount,
   }) async {
+    if (amount != null && amount <= 0) {
+      throw Exception('Сумма операции должна быть больше нуля');
+    }
     return await _db.transaction((txn) async {
       final currentTxnQuery = await txn.query(
         _transactionTable,
@@ -508,6 +521,9 @@ class DatabaseService {
     required double targetAmount,
     required DateTime deadline,
   }) async {
+    if (targetAmount <= 0) {
+      throw Exception('Целевая сумма должна быть больше нуля');
+    }
     final id = await _db.insert(_goalTable, {
       'account_id': accountId,
       'target_amount': targetAmount,
@@ -537,6 +553,9 @@ class DatabaseService {
     DateTime? deadline,
     bool? isCompleted,
   }) async {
+    if (targetAmount != null && targetAmount <= 0) {
+      throw Exception('Целевая сумма должна быть больше нуля');
+    }
     final Map<String, dynamic> updates = {};
     if (accountId != null) updates['account_id'] = accountId;
     if (targetAmount != null) updates['target_amount'] = targetAmount;
