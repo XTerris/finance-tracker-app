@@ -7,13 +7,14 @@ import '../../providers/goal_provider.dart';
 import '../../models/transaction.dart';
 import 'tab_widgets/transaction_plate.dart';
 import 'tab_widgets/add_transaction_bottom_sheet.dart';
+import 'tab_base.dart';
 
 enum TransactionType { income, expense, transfer }
 
 typedef FilterCallback =
     void Function(Set<int> categories, Set<TransactionType> types);
 
-class HistoryTab extends StatefulWidget {
+class HistoryTab extends TabBase {
   const HistoryTab({super.key});
 
   @override

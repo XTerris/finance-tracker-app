@@ -12,12 +12,13 @@ import 'dart:io';
 import '../../providers/transaction_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/account_provider.dart';
+import 'tab_base.dart';
 
 enum ChartType { none, bar, pie, line }
 
 enum ReportView { summary, chartSelection, chartView, forecast }
 
-class ReportsTab extends StatefulWidget {
+class ReportsTab extends TabBase {
   const ReportsTab({super.key});
 
   @override

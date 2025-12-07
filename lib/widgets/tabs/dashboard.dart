@@ -6,8 +6,9 @@ import '../../models/account.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/account_provider.dart';
 import 'tab_widgets/transaction_plate.dart';
+import 'tab_base.dart';
 
-class DashboardTab extends StatefulWidget {
+class DashboardTab extends TabBase {
   const DashboardTab({super.key});
 
   @override
