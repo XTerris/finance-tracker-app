@@ -18,7 +18,7 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/XTerris/finance_tracker_app.git
+git clone https://github.com/XTerris/finance-tracker-app.git
 cd finance_tracker_app
 ```
 
