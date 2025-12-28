@@ -1,13 +1,39 @@
-import 'dart:ui';
+import 'package:finance_tracker_app/service_locator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'widgets/dashboard.dart';
-import 'widgets/history.dart';
-import 'widgets/goals.dart';
-import 'widgets/reports.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'providers/category_provider.dart';
+import 'providers/transaction_provider.dart';
+import 'providers/account_provider.dart';
+import 'providers/goal_provider.dart';
+import 'widgets/home_page.dart';
 
-void main() {
-  runApp(const App());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Инициализация сервисов приложения (в том числе базы данных)
+  await ServiceLocator.init();
+
+  runApp(
+    // Настройка провайдеров для управления состоянием приложения
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<TransactionProvider>(
+          create: (context) => TransactionProvider()..init(),
+        ),
+        ChangeNotifierProvider<CategoryProvider>(
+          create: (context) => CategoryProvider()..init(),
+        ),
+        ChangeNotifierProvider<AccountProvider>(
+          create: (context) => AccountProvider()..init(),
+        ),
+        ChangeNotifierProvider<GoalProvider>(
+          create: (context) => GoalProvider()..init(),
+        ),
+      ],
+      child: const App(),
+    ),
+  );
 }
 
 class App extends StatelessWidget {
@@ -20,98 +46,15 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
+      // Поддержка русской и английской локализации
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en', 'US'), Locale('ru', 'RU')],
       scrollBehavior: NoThumbScrollBehavior().copyWith(scrollbars: false),
       home: const HomePage(),
     );
   }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
-  final List<Widget> _tabs = [
-    DashboardTab(key: PageStorageKey('dashboard_tab')),
-    HistoryTab(key: PageStorageKey('history_tab')),
-    GoalsTab(key: PageStorageKey('goals_tab')),
-    ReportsTab(key: PageStorageKey('reports_tab')),
-  ];
-
-  void _setCurrentIndex(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(index: _currentIndex, children: _tabs),
-      ),
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-        ),
-        elevation: 0.0,
-        toolbarHeight: 0.0,
-      ),
-      bottomNavigationBar: NavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _setCurrentIndex,
-      ),
-    );
-  }
-}
-
-class NavigationBar extends StatelessWidget {
-  const NavigationBar({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
-  final ValueChanged<int> onTap;
-
-  final int currentIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex, 
-      onTap: (index) => onTap(index),
-      selectedItemColor: Theme.of(context).colorScheme.primary,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      selectedFontSize: 14,
-      unselectedFontSize: 14,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Обзор'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'История'),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.monetization_on_outlined),
-          label: 'Цели и накопления',
-        ),
-        BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Отчёты'),
-      ],
-    );
-  }
-}
-
-class NoThumbScrollBehavior extends ScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.stylus,
-    PointerDeviceKind.trackpad,
-  };
 }
