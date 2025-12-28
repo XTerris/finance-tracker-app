@@ -1,16 +1,33 @@
-# finance_tracker_app
+# Финансовый трекер
 
-A new Flutter project.
+Мобильное приложение для учёта личных финансов на Flutter.
 
-## Getting Started
+## Описание
 
-This project is a starting point for a Flutter application.
+Полнофункциональное приложение для управления личными финансами, работающее полностью офлайн с локальным хранением данных. Отслеживайте транзакции, управляйте несколькими счетами, ставьте финансовые цели и просматривайте детальные отчёты.
 
-A few resources to get you started if this is your first Flutter project:
+## Возможности
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Управление транзакциями — учёт доходов и расходов с категориями
+- Управление банковскими счетами
+- Отслеживание целей по каждому счёту
+- Отчёты и аналитика
+- Все данные хранятся в локальной базе SQLite
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Установка
+
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/XTerris/finance_tracker_app.git
+cd finance_tracker_app
+```
+
+2. Установите зависимости:
+```bash
+flutter pub get
+```
+
+3. Запустите приложение:
+```bash
+flutter run
+```
